@@ -14,6 +14,7 @@ export default function Navigation() {
     { href: "/players", label: "Players" },
     { href: "/news", label: "News" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/sponsors", label: "Sponsors" },
     { href: "/join-us", label: "Join Us" },
     { href: "/contact", label: "Contact" },
   ];
@@ -36,8 +37,8 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.slice(0, 6).map((link) => (
               <Link key={link.href} href={link.href}>
                 <a
                   className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${
@@ -56,16 +57,16 @@ export default function Navigation() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
 
-        {/* Mobile Navigation */}
+          {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 space-y-2 border-t border-border">
+          <div className="md:hidden py-4 space-y-2 border-t border-border">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
                 <a

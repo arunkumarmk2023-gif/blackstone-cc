@@ -1,11 +1,19 @@
-/* Heritage Grain Design: Gallery page with masonry-style image grid */
+/* Heritage Grain Design: Gallery page with lightbox modal */
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
+import ImageModal from "@/components/ImageModal";
+import { useState } from "react";
+
+interface GalleryImage {
+  url: string;
+  caption: string;
+  category: string;
+}
 
 export default function Gallery() {
   // Sample gallery images - replace with actual photos
-  const galleryImages = [
+  const galleryImages: GalleryImage[] = [
     {
       url: "https://private-us-east-1.manuscdn.com/sessionFile/klKMM6w8N7qt6X5nMBFEDM/sandbox/Q9c2ieHPWlSgwHcUGYWZj6-img-4_1770877525000_na1fn_Y3JpY2tldC10ZWFtLWNlbGVicmF0aW9u.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUva2xLTU02dzhON3F0Nlg1bk1CRkVETS9zYW5kYm94L1E5YzJpZUhQV2xTZ3dIY1VHWVdaajYtaW1nLTRfMTc3MDg3NzUyNTAwMF9uYTFmbl9ZM0pwWTJ0bGRDMTBaV0Z0TFdObGJHVmljbUYwYVc5dS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=fn8LUB9R~8ANOgDkyOh8wmXghNYK9wUGaZAb2yJYvOsUxBmxmXAneS7YZiJqUEq1bkzAceQr87-dBfsjQNm-ZygUQn5r5-4S5QeO26X7F84gDgQnHMlDQpgNKKc2ZpsQRolObPgZYnjVnfPA0w~beN10XXa~29Wagve2yn4eqkwmnOeZp~9-UIlQ4T9Um5Bt2XPb4ciLPTtaP14iuo-GRQBbiQFLtNebiyJDGr32MTufycFdEo3r5AjP6q~686M8AtuqoLDn0LkAoJ4y3xkK0f2mb3-NC0kABe6T0ypRrf8UkOekKhdWW7Nvx6mep6zHy1cDVlbGoEyPM0qLVaE3Gg__",
       caption: "Team celebration after victory",
@@ -38,6 +46,20 @@ export default function Gallery() {
     },
   ];
 
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const handlePrevious = () => {
+    if (selectedIndex !== null && selectedIndex > 0) {
+      setSelectedIndex(selectedIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedIndex !== null && selectedIndex < galleryImages.length - 1) {
+      setSelectedIndex(selectedIndex + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -50,17 +72,21 @@ export default function Gallery() {
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
             Capturing memorable moments from matches, training sessions, and club events. 
-            Explore our visual journey through the season.
+            Explore our visual journey through the season. Click any image to view in full size.
           </p>
         </div>
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-16">
+      <section className="py-16" id="gallery">
         <div className="container">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {galleryImages.map((image, index) => (
-              <Card key={index} className="group overflow-hidden border-border hover:border-accent transition-all cursor-pointer">
+              <Card
+                key={index}
+                className="group overflow-hidden border-border hover:border-accent transition-all cursor-pointer"
+                onClick={() => setSelectedIndex(index)}
+              >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
                     src={image.url}
@@ -72,7 +98,7 @@ export default function Gallery() {
                       <p className="text-sm text-accent font-heading font-semibold mb-1">
                         {image.category}
                       </p>
-                      <p className="text-foreground font-medium">
+                      <p className="text-foreground font-medium line-clamp-2">
                         {image.caption}
                       </p>
                     </div>
@@ -94,6 +120,18 @@ export default function Gallery() {
           </div>
         </div>
       </section>
+
+      {/* Image Modal */}
+      {selectedIndex !== null && (
+        <ImageModal
+          isOpen={selectedIndex !== null}
+          imageUrl={galleryImages[selectedIndex].url}
+          caption={galleryImages[selectedIndex].caption}
+          onClose={() => setSelectedIndex(null)}
+          onPrevious={selectedIndex > 0 ? handlePrevious : undefined}
+          onNext={selectedIndex < galleryImages.length - 1 ? handleNext : undefined}
+        />
+      )}
 
       <Footer />
     </div>

@@ -9,6 +9,7 @@ import Fixtures from "./pages/Fixtures";
 import Players from "./pages/Players";
 import News from "./pages/News";
 import Gallery from "./pages/Gallery";
+import Sponsors from "./pages/Sponsors";
 import JoinUs from "./pages/JoinUs";
 import Contact from "./pages/Contact";
 
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/players"} component={Players} />
       <Route path={"/news"} component={News} />
       <Route path={"/gallery"} component={Gallery} />
+      <Route path={"/sponsors"} component={Sponsors} />
       <Route path={"/join-us"} component={JoinUs} />
       <Route path={"/contact"} component={Contact} />
       <Route path={"/404"} component={NotFound} />

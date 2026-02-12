@@ -1,6 +1,7 @@
-/* Heritage Grain Design: Home page with atmospheric hero and elegant layout */
+/* Heritage Grain Design: Home page with hero section, intro, and sponsors */
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import WeatherWidget from "@/components/WeatherWidget";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
@@ -33,14 +34,14 @@ export default function Home() {
             <h1 className="font-display font-bold text-5xl lg:text-7xl text-foreground mb-4 leading-tight">
               Blackstone Cricket Club
             </h1>
-            
+
             <p className="font-heading text-xl lg:text-2xl text-accent mb-6">
               Connecticut Cricket League – Hard Tennis Ball (TCL 2025)
             </p>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl">
-              A competitive cricket club dedicated to excellence, sportsmanship, and community. 
-              We bring together passionate players in Connecticut's premier hard tennis ball league, 
+              A competitive cricket club dedicated to excellence, sportsmanship, and community.
+              We bring together passionate players in Connecticut's premier hard tennis ball league,
               fostering both skill development and lasting friendships on the pitch.
             </p>
 
@@ -58,6 +59,13 @@ export default function Home() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Weather Widget */}
+      <section className="py-12 bg-background border-b border-border">
+        <div className="container">
+          <WeatherWidget />
         </div>
       </section>
 
@@ -100,17 +108,17 @@ export default function Home() {
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Blackstone Cricket Club represents the spirit of competitive cricket in Connecticut. 
-                  Founded by passionate cricketers, we compete in the Connecticut Cricket League's 
+                  Blackstone Cricket Club represents the spirit of competitive cricket in Connecticut.
+                  Founded by passionate cricketers, we compete in the Connecticut Cricket League's
                   Hard Tennis Ball division, bringing together players who share a love for the game.
                 </p>
                 <p>
-                  Our club values skill development, fair play, and camaraderie. Whether you're an 
-                  experienced cricketer or looking to develop your game, Blackstone CC offers a 
+                  Our club values skill development, fair play, and camaraderie. Whether you're an
+                  experienced cricketer or looking to develop your game, Blackstone CC offers a
                   welcoming environment where players can grow and compete at a high level.
                 </p>
                 <p>
-                  We participate in regular league matches, practice sessions, and club events 
+                  We participate in regular league matches, practice sessions, and club events
                   throughout the season. Join us to be part of Connecticut's vibrant cricket community.
                 </p>
               </div>
@@ -127,6 +135,47 @@ export default function Home() {
                 className="rounded-xl shadow-2xl"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsors Section */}
+      <section className="py-16 bg-card border-y border-border" id="sponsors">
+        <div className="container">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="font-display font-bold text-4xl text-foreground">
+              Our Partners
+            </h2>
+            <Link href="/sponsors">
+              <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading">
+                View All Sponsors
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {/* Sponsor Logo Placeholders */}
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-24 bg-secondary rounded-lg flex items-center justify-center hover:bg-secondary/80 transition-colors"
+              >
+                <div className="text-center">
+                  <p className="text-muted-foreground text-sm font-heading">Partner {i}</p>
+                  <p className="text-xs text-muted-foreground/60">Logo here</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground mb-4">
+              Interested in partnering with Blackstone CC?
+            </p>
+            <a href="mailto:sponsors@blackstonecc.com" className="text-accent hover:text-accent/80 font-heading font-semibold">
+              Become a Sponsor →
+            </a>
           </div>
         </div>
       </section>

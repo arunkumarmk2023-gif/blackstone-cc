@@ -1,12 +1,33 @@
-/* Heritage Grain Design: Join Us page with membership details */
+/* Heritage Grain Design: Enhanced Join Us page with form validation */
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Check, Users, Calendar, Trophy, Mail } from "lucide-react";
-import { Link } from "wouter";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function JoinUs() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+    experience: "",
+    message: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const benefits = [
     "Compete in Connecticut Cricket League matches",
     "Access to regular training sessions",
@@ -24,6 +45,59 @@ export default function JoinUs() {
     "Available for weekend matches",
   ];
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!formData.email.trim() || !formData.email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (!formData.role) {
+      toast.error("Please select your playing role");
+      return;
+    }
+    if (!formData.experience) {
+      toast.error("Please select your experience level");
+      return;
+    }
+    if (!formData.message.trim()) {
+      toast.error("Please tell us about yourself");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate form submission
+    setTimeout(() => {
+      toast.success("Thank you! We'll contact you soon about trials and training.");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        role: "",
+        experience: "",
+        message: "",
+      });
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -36,13 +110,14 @@ export default function JoinUs() {
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
             Become part of Connecticut's premier cricket club. Whether you're an experienced player 
-            or looking to develop your game, we welcome passionate cricketers to our squad.
+            or looking to develop your game, we welcome passionate cricketers to our squad. 
+            Social players and supporters are also welcome!
           </p>
         </div>
       </section>
 
       {/* Why Join Section */}
-      <section className="py-16">
+      <section className="py-16" id="join">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
@@ -108,21 +183,152 @@ export default function JoinUs() {
         </div>
       </section>
 
-      {/* How to Join */}
+      {/* Registration Form */}
       <section className="py-16 bg-card border-y border-border">
         <div className="container">
+          <div className="max-w-3xl mx-auto">
+            <Card className="p-8 lg:p-12 bg-background border-border">
+              <h2 className="font-display font-bold text-3xl text-foreground mb-2">
+                Join Our Squad
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                Fill out the form below and we'll be in touch about upcoming trials and training sessions.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-heading font-medium text-foreground mb-2">
+                    Full Name *
+                  </label>
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="bg-card border-border"
+                  />
+                </div>
+
+                {/* Email & Phone */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-heading font-medium text-foreground mb-2">
+                      Email Address *
+                    </label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="bg-card border-border"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-heading font-medium text-foreground mb-2">
+                      Phone Number
+                    </label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="+1 (234) 567-890"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="bg-card border-border"
+                    />
+                  </div>
+                </div>
+
+                {/* Role & Experience */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="role" className="block text-sm font-heading font-medium text-foreground mb-2">
+                      Playing Role *
+                    </label>
+                    <Select value={formData.role} onValueChange={(value) => handleSelectChange("role", value)}>
+                      <SelectTrigger className="bg-card border-border">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="batsman">Batsman</SelectItem>
+                        <SelectItem value="bowler">Bowler</SelectItem>
+                        <SelectItem value="allrounder">All-Rounder</SelectItem>
+                        <SelectItem value="wicketkeeper">Wicketkeeper</SelectItem>
+                        <SelectItem value="supporter">Supporter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label htmlFor="experience" className="block text-sm font-heading font-medium text-foreground mb-2">
+                      Experience Level *
+                    </label>
+                    <Select value={formData.experience} onValueChange={(value) => handleSelectChange("experience", value)}>
+                      <SelectTrigger className="bg-card border-border">
+                        <SelectValue placeholder="Select experience level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label htmlFor="message" className="block text-sm font-heading font-medium text-foreground mb-2">
+                    Tell Us About Yourself *
+                  </label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    placeholder="Share your cricket experience, why you want to join, and any other relevant information..."
+                    rows={5}
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    className="bg-card border-border resize-none"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  size="lg"
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                </Button>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  * Required fields
+                </p>
+              </form>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How to Join */}
+      <section className="py-16">
+        <div className="container">
           <h2 className="font-display font-bold text-4xl text-foreground mb-12 text-center">
-            How to Join
+            The Process
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
                 1
               </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Get in Touch</h3>
+              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Apply</h3>
               <p className="text-muted-foreground">
-                Contact us via email or phone to express your interest in joining the club.
+                Fill out the registration form above with your details and experience level.
               </p>
             </div>
 
@@ -130,9 +336,9 @@ export default function JoinUs() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
                 2
               </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Attend Trial</h3>
+              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Trial</h3>
               <p className="text-muted-foreground">
-                Join us for a practice session to meet the team and showcase your skills.
+                We'll invite you to a practice session to meet the team and showcase your skills.
               </p>
             </div>
 
@@ -140,39 +346,12 @@ export default function JoinUs() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
                 3
               </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Join the Squad</h3>
+              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Join</h3>
               <p className="text-muted-foreground">
                 Complete registration and become an official member of Blackstone CC.
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="container">
-          <Card className="p-12 bg-gradient-to-br from-accent/10 to-accent/5 border-accent text-center">
-            <h2 className="font-display font-bold text-3xl lg:text-4xl text-foreground mb-4">
-              Ready to Join Blackstone CC?
-            </h2>
-            <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-              Take the first step towards becoming part of our cricket family. 
-              Contact us today to learn more about membership and upcoming trials.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-heading">
-                  <Mail className="mr-2 h-5 w-5" />
-                  Contact Us
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading">
-                <Calendar className="mr-2 h-5 w-5" />
-                View Practice Schedule
-              </Button>
-            </div>
-          </Card>
         </div>
       </section>
 
