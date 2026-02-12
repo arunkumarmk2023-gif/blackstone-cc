@@ -31,30 +31,22 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Home
-                  </a>
+                  Home
                 </Link>
               </li>
               <li>
                 <Link href="/fixtures">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Fixtures & Results
-                  </a>
+                  Fixtures & Results
                 </Link>
               </li>
               <li>
                 <Link href="/players">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Players
-                  </a>
+                  Players
                 </Link>
               </li>
               <li>
                 <Link href="/news">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    News
-                  </a>
+                  News
                 </Link>
               </li>
             </ul>
@@ -65,31 +57,23 @@ export default function Footer() {
             <h4 className="font-heading font-semibold text-foreground mb-4">More</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/gallery">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Gallery
-                  </a>
+                <Link href="/gallery" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                  Gallery
                 </Link>
               </li>
               <li>
-                <Link href="/sponsors">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Our Sponsors
-                  </a>
+                <Link href="/sponsors" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                  Our Sponsors
                 </Link>
               </li>
               <li>
-                <Link href="/join-us">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Join Us
-                  </a>
+                <Link href="/join-us" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                  Join Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact">
-                  <a className="text-muted-foreground hover:text-accent transition-colors text-sm">
-                    Contact
-                  </a>
+                <Link href="/contact" className="text-muted-foreground hover:text-accent transition-colors text-sm">
+                  Contact
                 </Link>
               </li>
             </ul>
