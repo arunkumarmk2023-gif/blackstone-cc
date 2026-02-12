@@ -167,15 +167,17 @@ export default function Sponsors() {
                 </p>
 
                 {sponsor.website && (
-                  <a
-                    href={sponsor.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-sm font-semibold"
-                  >
-                    <Globe className="w-4 h-4" />
-                    Visit Website
-                  </a>
+                  <div className="inline-flex">
+                    <a
+                      href={sponsor.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-sm font-semibold"
+                    >
+                      <Globe className="w-4 h-4" />
+                      Visit Website
+                    </a>
+                  </div>
                 )}
               </Card>
             ))}
