@@ -29,7 +29,8 @@ export default function Home() {
               <img
                 src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
                 alt="Blackstone CC Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain mix-blend-screen"
+                style={{ backgroundColor: 'transparent' }}
               />
             </div>
 

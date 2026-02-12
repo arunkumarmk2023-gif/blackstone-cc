@@ -28,7 +28,8 @@ export default function Navigation() {
             <img
               src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
               alt="Blackstone CC Logo"
-              className="w-12 h-12 object-contain"
+              className="w-12 h-12 object-contain mix-blend-screen"
+              style={{ backgroundColor: 'transparent' }}
             />
             <div className="hidden sm:block">
               <div className="font-display font-bold text-xl text-foreground">Blackstone CC</div>
