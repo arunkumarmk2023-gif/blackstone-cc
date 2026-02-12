@@ -24,9 +24,13 @@ export default function Home() {
         {/* Hero Content */}
         <div className="container relative z-10">
           <div className="max-w-3xl">
-            {/* Logo Placeholder */}
-            <div className="w-24 h-24 lg:w-32 lg:h-32 bg-accent rounded-full flex items-center justify-center mb-8 shadow-2xl">
-              <span className="text-accent-foreground font-display font-bold text-4xl lg:text-5xl">BC</span>
+            {/* Logo */}
+            <div className="w-24 h-24 lg:w-32 lg:h-32 mb-8 shadow-2xl">
+              <img
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+                alt="Blackstone CC Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
 
             <h1 className="font-display font-bold text-5xl lg:text-7xl text-foreground mb-4 leading-tight">

@@ -25,9 +25,11 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-              <span className="text-accent-foreground font-display font-bold text-xl">BC</span>
-            </div>
+            <img
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+              alt="Blackstone CC Logo"
+              className="w-12 h-12 object-contain"
+            />
             <div className="hidden sm:block">
               <div className="font-display font-bold text-xl text-foreground">Blackstone CC</div>
               <div className="text-xs text-muted-foreground font-heading">Connecticut Cricket League</div>

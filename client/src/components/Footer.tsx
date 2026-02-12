@@ -18,7 +18,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            <h3 className="font-display font-bold text-lg text-accent mb-4">Blackstone CC</h3>
+            <div className="w-16 h-16 mb-4">
+              <img
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+                alt="Blackstone CC Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Competing in the Connecticut Cricket League (CCL) Hard Tennis Ball division. 
               Building community through cricket excellence.
