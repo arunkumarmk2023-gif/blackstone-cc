@@ -1,5 +1,5 @@
 /* Heritage Grain Design: Navigation with warm gold accents on rich brown background */
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -24,32 +24,30 @@ export default function Navigation() {
       <div className="container">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/">
-            <a className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                <span className="text-accent-foreground font-display font-bold text-xl">BC</span>
-              </div>
-              <div className="hidden sm:block">
-                <div className="font-display font-bold text-xl text-foreground">Blackstone CC</div>
-                <div className="text-xs text-muted-foreground font-heading">Connecticut Cricket League</div>
-              </div>
-            </a>
-          </Link>
+          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+              <span className="text-accent-foreground font-display font-bold text-xl">BC</span>
+            </div>
+            <div className="hidden sm:block">
+              <div className="font-display font-bold text-xl text-foreground">Blackstone CC</div>
+              <div className="text-xs text-muted-foreground font-heading">Connecticut Cricket League</div>
+            </div>
+          </a>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.slice(0, 6).map((link) => (
-              <Link key={link.href} href={link.href}>
-                <a
-                  className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${
-                    location === link.href
-                      ? "bg-accent text-accent-foreground font-semibold"
-                      : "text-foreground hover:bg-secondary hover:text-accent"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              </Link>
+              <a
+                key={link.href}
+                href={link.href}
+                className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${
+                  location === link.href
+                    ? "bg-accent text-accent-foreground font-semibold"
+                    : "text-foreground hover:bg-secondary hover:text-accent"
+                }`}
+              >
+                {link.label}
+              </a>
             ))}
           </div>
 
@@ -64,22 +62,21 @@ export default function Navigation() {
           </Button>
         </div>
 
-          {/* Mobile Navigation */}
+        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 space-y-2 border-t border-border">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <a
-                  className={`block px-4 py-3 rounded-lg font-heading transition-all ${
-                    location === link.href
-                      ? "bg-accent text-accent-foreground font-semibold"
-                      : "text-foreground hover:bg-secondary hover:text-accent"
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </a>
-              </Link>
+              <a
+                key={link.href}
+                href={link.href}
+                className={`block px-4 py-3 rounded-lg font-heading transition-all ${
+                  location === link.href
+                    ? "bg-accent text-accent-foreground font-semibold"
+                    : "text-foreground hover:bg-secondary hover:text-accent"
+                }`}
+              >
+                {link.label}
+              </a>
             ))}
           </div>
         )}
