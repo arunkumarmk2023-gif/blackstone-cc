@@ -3,8 +3,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification } from "../drizzle/schema";
 
 export const appRouter = router({
   system: systemRouter,
@@ -144,6 +144,25 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete news");
       return deleteNews(input.id);
+    }),
+  }),
+
+  notifications: router({
+    list: publicProcedure.query(() => getNotifications()),
+    create: protectedProcedure.input(z.object({
+      title: z.string(),
+      message: z.string(),
+      type: z.enum(["info", "success", "warning", "error", "match_alert", "announcement"]).optional(),
+      icon: z.string().optional(),
+      isGlobal: z.number().optional(),
+      actionUrl: z.string().optional(),
+      actionLabel: z.string().optional(),
+    })).mutation(({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can create notifications");
+      return createNotification(input as InsertNotification);
+    }),
+    markAsRead: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => {
+      return markNotificationAsRead(input.id);
     }),
   }),
 });

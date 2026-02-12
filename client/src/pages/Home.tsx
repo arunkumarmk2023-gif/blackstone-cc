@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WeatherWidget from "@/components/WeatherWidget";
+import NotificationCenter from "@/components/NotificationCenter";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
 
 export default function Home() {
@@ -13,6 +14,11 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+
+      {/* Notifications */}
+      <div className="container pt-4">
+        <NotificationCenter />
+      </div>
 
       {/* Hero Section */}
       <section className="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden">

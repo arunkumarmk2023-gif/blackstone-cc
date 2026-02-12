@@ -91,3 +91,25 @@ export const news = mysqlTable("news", {
 
 export type News = typeof news.$inferSelect;
 export type InsertNews = typeof news.$inferInsert;
+
+/**
+ * Notifications table for storing system and user notifications
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: mysqlEnum("type", ["info", "success", "warning", "error", "match_alert", "announcement"]).default("info").notNull(),
+  icon: varchar("icon", { length: 50 }),
+  userId: int("userId"),
+  isGlobal: int("isGlobal").default(1).notNull(),
+  read: int("read").default(0).notNull(),
+  actionUrl: text("actionUrl"),
+  actionLabel: varchar("actionLabel", { length: 100 }),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

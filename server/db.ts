@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -186,4 +186,26 @@ export async function deleteNews(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(news).where(eq(news.id, id));
+}
+
+// Notifications queries
+export async function getNotifications(userId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  if (userId) {
+    return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+  }
+  return await db.select().from(notifications).where(eq(notifications.isGlobal, 1)).orderBy(desc(notifications.createdAt));
+}
+
+export async function createNotification(notification: InsertNotification) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(notifications).values(notification);
+}
+
+export async function markNotificationAsRead(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(notifications).set({ read: 1 }).where(eq(notifications.id, id));
 }

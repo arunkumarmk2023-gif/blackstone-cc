@@ -79,10 +79,11 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
@@ -238,6 +239,47 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground">No news yet. Create one to get started!</p>
                   </Card>
                 )}
+              </TabsContent>
+
+              {/* Notifications Tab */}
+              <TabsContent value="notifications" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
+                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
+                    <Plus className="w-4 h-4" />
+                    Send Notification
+                  </button>
+                </div>
+                <Card className="p-6 bg-secondary/50 border-border">
+                  <h3 className="font-heading font-semibold text-foreground mb-2">Notification Management</h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Send important alerts to club members about match updates, announcements, and events.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-heading text-foreground mb-2">Title</label>
+                      <input type="text" placeholder="Notification title" className="w-full px-3 py-2 rounded border border-border bg-background text-foreground" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-heading text-foreground mb-2">Message</label>
+                      <textarea placeholder="Notification message" rows={3} className="w-full px-3 py-2 rounded border border-border bg-background text-foreground" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-heading text-foreground mb-2">Type</label>
+                      <select className="w-full px-3 py-2 rounded border border-border bg-background text-foreground">
+                        <option>info</option>
+                        <option>success</option>
+                        <option>warning</option>
+                        <option>error</option>
+                        <option>match_alert</option>
+                        <option>announcement</option>
+                      </select>
+                    </div>
+                    <button className="w-full px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
+                      Send Notification
+                    </button>
+                  </div>
+                </Card>
               </TabsContent>
             </Tabs>
 
