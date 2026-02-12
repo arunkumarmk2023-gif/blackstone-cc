@@ -25,4 +25,69 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Fixtures table for storing match schedules and results
+ */
+export const fixtures = mysqlTable("fixtures", {
+  id: int("id").autoincrement().primaryKey(),
+  opponent: varchar("opponent", { length: 255 }).notNull(),
+  venue: varchar("venue", { length: 255 }).notNull(),
+  date: timestamp("date").notNull(),
+  format: varchar("format", { length: 50 }).notNull().default("Hard Tennis Ball"),
+  status: mysqlEnum("status", ["upcoming", "live", "completed", "cancelled"]).default("upcoming").notNull(),
+  ourScore: varchar("ourScore", { length: 50 }),
+  ourWickets: varchar("ourWickets", { length: 10 }),
+  theirScore: varchar("theirScore", { length: 50 }),
+  theirWickets: varchar("theirWickets", { length: 10 }),
+  result: varchar("result", { length: 100 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Fixture = typeof fixtures.$inferSelect;
+export type InsertFixture = typeof fixtures.$inferInsert;
+
+/**
+ * Players table for storing player profiles and statistics
+ */
+export const players = mysqlTable("players", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  role: mysqlEnum("role", ["Batsman", "Bowler", "All-Rounder", "Wicketkeeper"]).notNull(),
+  battingStyle: varchar("battingStyle", { length: 50 }),
+  bowlingStyle: varchar("bowlingStyle", { length: 50 }),
+  jerseyNumber: int("jerseyNumber"),
+  photoUrl: text("photoUrl"),
+  bio: text("bio"),
+  isCaptain: int("isCaptain").default(0).notNull(),
+  isImpactPlayer: int("isImpactPlayer").default(0).notNull(),
+  runsScored: int("runsScored").default(0).notNull(),
+  wicketsTaken: int("wicketsTaken").default(0).notNull(),
+  matchesPlayed: int("matchesPlayed").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Player = typeof players.$inferSelect;
+export type InsertPlayer = typeof players.$inferInsert;
+
+/**
+ * News table for storing match reports and announcements
+ */
+export const news = mysqlTable("news", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  category: mysqlEnum("category", ["Match Report", "Announcement", "Selection", "Event", "Other"]).default("Other").notNull(),
+  summary: text("summary").notNull(),
+  content: text("content").notNull(),
+  imageUrl: text("imageUrl"),
+  author: varchar("author", { length: 255 }),
+  published: int("published").default(0).notNull(),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type News = typeof news.$inferSelect;
+export type InsertNews = typeof news.$inferInsert;

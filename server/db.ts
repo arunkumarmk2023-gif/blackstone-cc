@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,101 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Fixtures queries
+export async function getFixtures() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(fixtures).orderBy(desc(fixtures.date));
+}
+
+export async function getFixtureById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(fixtures).where(eq(fixtures.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createFixture(fixture: InsertFixture) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(fixtures).values(fixture);
+  return result;
+}
+
+export async function updateFixture(id: number, fixture: Partial<InsertFixture>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(fixtures).set(fixture).where(eq(fixtures.id, id));
+}
+
+export async function deleteFixture(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(fixtures).where(eq(fixtures.id, id));
+}
+
+// Players queries
+export async function getPlayers() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(players).orderBy(players.jerseyNumber);
+}
+
+export async function getPlayerById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(players).where(eq(players.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createPlayer(player: InsertPlayer) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(players).values(player);
+  return result;
+}
+
+export async function updatePlayer(id: number, player: Partial<InsertPlayer>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(players).set(player).where(eq(players.id, id));
+}
+
+export async function deletePlayer(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(players).where(eq(players.id, id));
+}
+
+// News queries
+export async function getNews() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(news).where(eq(news.published, 1)).orderBy(desc(news.publishedAt));
+}
+
+export async function getNewsById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(news).where(eq(news.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createNews(newsItem: InsertNews) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(news).values(newsItem);
+  return result;
+}
+
+export async function updateNews(id: number, newsItem: Partial<InsertNews>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(news).set(newsItem).where(eq(news.id, id));
+}
+
+export async function deleteNews(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(news).where(eq(news.id, id));
+}

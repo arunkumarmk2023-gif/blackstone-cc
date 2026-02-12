@@ -1,74 +1,44 @@
-/* Heritage Grain Design: Players page with elegant card grid */
+/* Heritage Grain Design: Players page with dynamic data from database */
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Zap } from "lucide-react";
-
-interface Player {
-  name: string;
-  role: string;
-  battingStyle: string;
-  bowlingStyle: string;
-  isCaptain?: boolean;
-  isImpactPlayer?: boolean;
-}
+import { Crown, Zap, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 export default function Players() {
-  // Sample player data - replace with actual data
-  const players: Player[] = [
-    {
-      name: "Rajesh Kumar",
-      role: "Captain, All-Rounder",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "Right-arm medium",
-      isCaptain: true,
-      isImpactPlayer: true,
-    },
-    {
-      name: "Amit Sharma",
-      role: "Vice-Captain, Batsman",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "N/A",
-      isImpactPlayer: true,
-    },
-    {
-      name: "Vikram Patel",
-      role: "Wicketkeeper",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "N/A",
-    },
-    {
-      name: "Suresh Reddy",
-      role: "Bowler",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "Right-arm fast",
-    },
-    {
-      name: "Anil Gupta",
-      role: "All-Rounder",
-      battingStyle: "Left-hand bat",
-      bowlingStyle: "Left-arm spin",
-    },
-    {
-      name: "Karthik Iyer",
-      role: "Batsman",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "N/A",
-    },
-    {
-      name: "Deepak Singh",
-      role: "Bowler",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "Right-arm fast",
-    },
-    {
-      name: "Manoj Verma",
-      role: "All-Rounder",
-      battingStyle: "Right-hand bat",
-      bowlingStyle: "Right-arm medium",
-    },
-  ];
+  const { data: players, isLoading, error } = trpc.players.list.useQuery();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1 py-20">
+          <div className="container">
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="animate-spin" />
+              <span>Loading players...</span>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1 py-20">
+          <div className="container">
+            <div className="text-red-500">Error loading players: {error.message}</div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -88,55 +58,103 @@ export default function Players() {
       </section>
 
       {/* Players Grid */}
-      <section className="py-16">
+      <section className="py-16" id="players">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {players.map((player, index) => (
-              <Card key={index} className="p-6 bg-card border-border hover:border-accent transition-all group">
-                {/* Player Photo Placeholder */}
-                <div className="relative mb-4">
-                  <div className="w-full aspect-square rounded-lg bg-secondary flex items-center justify-center overflow-hidden">
-                    <div className="text-6xl text-muted-foreground/30 font-display">
-                      {player.name.split(' ').map(n => n[0]).join('')}
+            {players && players.length > 0 ? (
+              players.map((player: any) => (
+                <Card key={player.id} className="p-6 bg-card border-border hover:border-accent transition-all group">
+                  {/* Player Photo */}
+                  <div className="relative mb-4">
+                    <div className="w-full aspect-square rounded-lg bg-secondary flex items-center justify-center overflow-hidden">
+                      {player.photoUrl ? (
+                        <img 
+                          src={player.photoUrl} 
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-6xl text-muted-foreground/30 font-display">
+                          {player.name.split(' ').map((n: string) => n[0]).join('')}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Badges */}
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      {player.isCaptain === 1 && (
+                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-lg" title="Captain">
+                          <Crown className="w-4 h-4 text-accent-foreground" />
+                        </div>
+                      )}
+                      {player.isImpactPlayer === 1 && (
+                        <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center shadow-lg" title="Impact Player">
+                          <Zap className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Player Info */}
+                  <h3 className="font-display font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
+                    {player.name}
+                  </h3>
                   
-                  {/* Badges */}
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    {player.isCaptain && (
-                      <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-lg" title="Captain">
-                        <Crown className="w-4 h-4 text-accent-foreground" />
+                  {player.jerseyNumber && (
+                    <p className="text-sm text-muted-foreground mb-2">Jersey #{player.jerseyNumber}</p>
+                  )}
+                  
+                  <Badge variant="secondary" className="mb-4 font-heading">
+                    {player.role}
+                  </Badge>
+
+                  <div className="space-y-2 text-sm mb-4">
+                    {player.battingStyle && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Batting:</span>
+                        <span className="text-foreground">{player.battingStyle}</span>
                       </div>
                     )}
-                    {player.isImpactPlayer && (
-                      <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center shadow-lg" title="Impact Player">
-                        <Zap className="w-4 h-4 text-white" />
+                    {player.bowlingStyle && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Bowling:</span>
+                        <span className="text-foreground">{player.bowlingStyle}</span>
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Player Info */}
-                <h3 className="font-display font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
-                  {player.name}
-                </h3>
-                
-                <Badge variant="secondary" className="mb-4 font-heading">
-                  {player.role}
-                </Badge>
+                  {/* Stats */}
+                  {(player.runsScored > 0 || player.wicketsTaken > 0 || player.matchesPlayed > 0) && (
+                    <div className="border-t border-border pt-3 mt-3">
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div>
+                          <p className="font-bold text-accent">{player.runsScored}</p>
+                          <p className="text-muted-foreground">Runs</p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-accent">{player.wicketsTaken}</p>
+                          <p className="text-muted-foreground">Wickets</p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-accent">{player.matchesPlayed}</p>
+                          <p className="text-muted-foreground">Matches</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Batting:</span>
-                    <span className="text-foreground">{player.battingStyle}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Bowling:</span>
-                    <span className="text-foreground">{player.bowlingStyle}</span>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  {player.bio && (
+                    <p className="text-sm text-muted-foreground mt-3 italic">
+                      {player.bio}
+                    </p>
+                  )}
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground">No players available yet</p>
+              </div>
+            )}
           </div>
 
           {/* Add Player Note */}

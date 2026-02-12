@@ -12,6 +12,7 @@ import Gallery from "./pages/Gallery";
 import Sponsors from "./pages/Sponsors";
 import JoinUs from "./pages/JoinUs";
 import Contact from "./pages/Contact";
+import AdminDashboard from "./pages/AdminDashboard";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path={"/sponsors"} component={Sponsors} />
       <Route path={"/join-us"} component={JoinUs} />
       <Route path={"/contact"} component={Contact} />
+      <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
