@@ -1,10 +1,15 @@
 /* Heritage Grain Design: Home page with hero section, intro, and sponsors */
+import { useAuth } from "@/_core/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WeatherWidget from "@/components/WeatherWidget";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
