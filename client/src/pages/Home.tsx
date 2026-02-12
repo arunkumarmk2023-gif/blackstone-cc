@@ -27,7 +27,7 @@ export default function Home() {
             {/* Logo */}
             <div className="w-24 h-24 lg:w-32 lg:h-32 mb-8 shadow-2xl">
               <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
                 alt="Blackstone CC Logo"
                 className="w-full h-full object-contain"
               />

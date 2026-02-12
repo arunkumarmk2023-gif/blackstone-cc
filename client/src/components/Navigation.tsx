@@ -26,7 +26,7 @@ export default function Navigation() {
           {/* Logo */}
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img
-              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
               alt="Blackstone CC Logo"
               className="w-12 h-12 object-contain"
             />

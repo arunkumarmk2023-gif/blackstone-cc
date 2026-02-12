@@ -20,7 +20,7 @@ export default function Footer() {
           <div>
             <div className="w-16 h-16 mb-4">
               <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/cQhhQFzxXSiIXmcL.jpeg"
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
                 alt="Blackstone CC Logo"
                 className="w-full h-full object-contain"
               />
