@@ -2,8 +2,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WeatherWidget from "@/components/WeatherWidget";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
 
 export default function Home() {
@@ -46,17 +44,17 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/fixtures">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground font-heading text-base">
-                  View Fixtures
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/join-us">
-                <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading text-base">
-                  Join the Club
-                </Button>
-              </Link>
+              <a href="/fixtures" className="inline-block">
+              <span className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading text-base cursor-pointer transition-colors">
+                View Fixtures
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </span>
+            </a>
+            <a href="/join-us" className="inline-block">
+              <span className="inline-flex items-center justify-center px-6 py-3 rounded-md border border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading text-base cursor-pointer transition-colors">
+                Join the Club
+              </span>
+            </a>
             </div>
           </div>
         </div>
@@ -122,11 +120,11 @@ export default function Home() {
                   throughout the season. Join us to be part of Connecticut's vibrant cricket community.
                 </p>
               </div>
-              <Link href="/join-us">
-                <Button size="lg" className="mt-8 bg-accent hover:bg-accent/90 text-accent-foreground font-heading">
+              <a href="/join-us" className="inline-block mt-8">
+                <span className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
                   Learn More About Joining
-                </Button>
-              </Link>
+                </span>
+              </a>
             </div>
             <div className="relative">
               <img
@@ -146,12 +144,12 @@ export default function Home() {
             <h2 className="font-display font-bold text-4xl text-foreground">
               Our Partners
             </h2>
-            <Link href="/sponsors">
-              <Button variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading">
+            <a href="/sponsors" className="inline-block">
+              <span className="inline-flex items-center justify-center px-4 py-2 rounded-md border border-accent text-accent hover:bg-accent hover:text-accent-foreground font-heading text-sm cursor-pointer transition-colors">
                 View All Sponsors
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+              </span>
+            </a>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
