@@ -50,7 +50,7 @@ export default function Home() {
             </h1>
 
             <p className="font-heading text-xl lg:text-2xl text-accent mb-6">
-              Connecticut Cricket League – Hard Tennis Ball (TCL 2025)
+              Hard Tennis Ball Cricket
             </p>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl">
@@ -98,14 +98,14 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-4">
                 <Users className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="font-display font-bold text-3xl text-foreground mb-2">15+ Players</h3>
+              <h3 className="font-display font-bold text-3xl text-foreground mb-2">20+ Players</h3>
               <p className="text-muted-foreground font-heading">Active Squad Members</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-4">
                 <Calendar className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="font-display font-bold text-3xl text-foreground mb-2">Season 2025</h3>
+              <h3 className="font-display font-bold text-3xl text-foreground mb-2">Season 2026</h3>
               <p className="text-muted-foreground font-heading">Hard Tennis Ball Format</p>
             </div>
           </div>

@@ -137,7 +137,7 @@ export default function Footer() {
         <div className="container py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Blackstone Cricket Club. All rights reserved.</p>
-            <p>Connecticut Cricket League – TCL 2025 • Hard Tennis Ball Format</p>
+            <p>Hard Tennis Ball Format</p>
           </div>
         </div>
       </div>
