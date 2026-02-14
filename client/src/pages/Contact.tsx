@@ -42,10 +42,10 @@ export default function Contact() {
               </div>
               <h3 className="font-heading font-semibold text-lg text-foreground mb-2">Email</h3>
               <a
-                href="mailto:contact@blackstonecc.com"
+                href="mailto:blackstonecricketclub@myyahoo.com"
                 className="text-muted-foreground hover:text-accent transition-colors"
               >
-                contact@blackstonecc.com
+                blackstonecricketclub@myyahoo.com
               </a>
             </Card>
 

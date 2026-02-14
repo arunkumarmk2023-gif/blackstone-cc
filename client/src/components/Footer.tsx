@@ -1,6 +1,6 @@
 /* Heritage Grain Design: Enhanced footer with decorative divider and comprehensive links */
 import { Link } from "wouter";
-import { Facebook, Twitter, Instagram, Mail, ExternalLink } from "lucide-react";
+import { Facebook, Instagram, Mail, ExternalLink, AtSign } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -91,28 +91,34 @@ export default function Footer() {
             <h4 className="font-heading font-semibold text-foreground mb-4">Connect</h4>
             <div className="flex gap-3 mb-4">
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61571168053666"
+                target="_blank"
+                rel="noopener noreferrer"
                 title="Facebook"
                 className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="#"
-                title="Twitter"
-                className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
+                href="https://www.instagram.com/blackstone_cricket_club/"
+                target="_blank"
+                rel="noopener noreferrer"
                 title="Instagram"
                 className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="mailto:contact@blackstonecc.com"
+                href="https://www.threads.com/@blackstone_cricket_club"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Threads"
+                className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
+              >
+                <AtSign className="w-5 h-5" />
+              </a>
+              <a
+                href="mailto:blackstonecricketclub@myyahoo.com"
                 title="Email"
                 className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
               >
