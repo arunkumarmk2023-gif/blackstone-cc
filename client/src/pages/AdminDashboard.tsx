@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const fixturesQuery = trpc.fixtures.list.useQuery();
   const playersQuery = trpc.players.list.useQuery();
   const newsQuery = trpc.news.list.useQuery();
+  const newsletterQuery = trpc.newsletter.list.useQuery();
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "admin")) {
@@ -79,11 +80,12 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
@@ -280,6 +282,64 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </Card>
+              </TabsContent>
+
+              {/* Newsletter Tab */}
+              <TabsContent value="newsletter" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Newsletter Subscribers</h2>
+                </div>
+
+                {newsletterQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading subscribers...</span>
+                  </div>
+                ) : newsletterQuery.data && newsletterQuery.data.length > 0 ? (
+                  <div className="space-y-4">
+                    <Card className="p-4 bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">
+                        Total Subscribers: <span className="font-bold text-foreground">{newsletterQuery.data.length}</span>
+                      </p>
+                    </Card>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-3 px-4 font-heading font-semibold">Email</th>
+                            <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
+                            <th className="text-left py-3 px-4 font-heading font-semibold">Subscribed</th>
+                            <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
+                            <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {newsletterQuery.data.map((subscriber: any) => (
+                            <tr key={subscriber.id} className="border-b border-border hover:bg-card/50">
+                              <td className="py-3 px-4">{subscriber.email}</td>
+                              <td className="py-3 px-4">{subscriber.name || "-"}</td>
+                              <td className="py-3 px-4">
+                                <Badge variant={subscriber.subscribed ? "default" : "outline"}>
+                                  {subscriber.subscribed ? "Active" : "Unsubscribed"}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-4 text-sm">{new Date(subscriber.subscribedAt).toLocaleDateString()}</td>
+                              <td className="py-3 px-4">
+                                <button className="p-2 hover:bg-secondary rounded transition-colors">
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No newsletter subscribers yet.</p>
+                  </Card>
+                )}
               </TabsContent>
             </Tabs>
 

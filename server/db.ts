@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -208,4 +208,36 @@ export async function markNotificationAsRead(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.update(notifications).set({ read: 1 }).where(eq(notifications.id, id));
+}
+
+// Newsletter subscribers queries
+export async function subscribeNewsletter(subscriber: InsertNewsletterSubscriber) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(newsletterSubscribers).values(subscriber);
+}
+
+export async function getNewsletterSubscribers() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.subscribed, 1));
+}
+
+export async function getSubscriberByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function unsubscribeNewsletter(email: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(newsletterSubscribers).set({ subscribed: 0, unsubscribedAt: new Date() }).where(eq(newsletterSubscribers.email, email));
+}
+
+export async function deleteNewsletterSubscriber(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(newsletterSubscribers).where(eq(newsletterSubscribers.id, id));
 }

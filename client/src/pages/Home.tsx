@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WeatherWidget from "@/components/WeatherWidget";
 import NotificationCenter from "@/components/NotificationCenter";
+import NewsletterForm from "@/components/NewsletterForm";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
 
 export default function Home() {
@@ -191,6 +192,13 @@ export default function Home() {
               Become a Sponsor →
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-card border-b border-border">
+        <div className="container max-w-2xl">
+          <NewsletterForm variant="footer" />
         </div>
       </section>
 

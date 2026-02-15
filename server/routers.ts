@@ -3,8 +3,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber } from "../drizzle/schema";
 
 export const appRouter = router({
   system: systemRouter,
@@ -163,6 +163,39 @@ export const appRouter = router({
     }),
     markAsRead: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => {
       return markNotificationAsRead(input.id);
+    }),
+  }),
+
+  newsletter: router({
+    subscribe: publicProcedure.input(z.object({
+      email: z.string().email(),
+      name: z.string().optional(),
+    })).mutation(async ({ input }) => {
+      const existing = await getSubscriberByEmail(input.email);
+      if (existing && existing.subscribed) {
+        throw new Error("Email already subscribed");
+      }
+      return await subscribeNewsletter({
+        email: input.email,
+        name: input.name,
+        subscribed: 1,
+        verified: 1,
+      } as InsertNewsletterSubscriber);
+    }),
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view subscribers");
+      return await getNewsletterSubscribers();
+    }),
+    unsubscribe: publicProcedure.input(z.object({
+      email: z.string().email(),
+    })).mutation(({ input }) => {
+      return unsubscribeNewsletter(input.email);
+    }),
+    delete: protectedProcedure.input(z.object({
+      id: z.number(),
+    })).mutation(({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete subscribers");
+      return deleteNewsletterSubscriber(input.id);
     }),
   }),
 });

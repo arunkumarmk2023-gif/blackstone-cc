@@ -1,6 +1,7 @@
 /* Heritage Grain Design: Enhanced footer with decorative divider and comprehensive links */
 import { Link } from "wouter";
 import { Facebook, Instagram, Mail, ExternalLink, AtSign } from "lucide-react";
+import NewsletterForm from "./NewsletterForm";
 
 export default function Footer() {
   return (
@@ -135,6 +136,14 @@ export default function Footer() {
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      {/* Newsletter Subscription */}
+      <div className="border-t border-border bg-secondary/30 py-8">
+        <div className="container">
+          <NewsletterForm variant="compact" className="max-w-md" />
         </div>
       </div>
 
