@@ -153,3 +153,25 @@ export const contactSubmissions = mysqlTable("contactSubmissions", {
 
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 export type InsertContactSubmission = typeof contactSubmissions.$inferInsert;
+
+/**
+ * Gallery table for storing match photos and team event images
+ */
+export const gallery = mysqlTable("gallery", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  imageUrl: text("imageUrl").notNull(),
+  fileKey: text("fileKey").notNull(),
+  fileSize: int("fileSize"),
+  mimeType: varchar("mimeType", { length: 50 }),
+  category: mysqlEnum("category", ["Match", "Training", "Event", "Team Photo", "Other"]).default("Other").notNull(),
+  uploadedBy: int("uploadedBy"),
+  featured: int("featured").default(0).notNull(),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Gallery = typeof gallery.$inferSelect;
+export type InsertGallery = typeof gallery.$inferInsert;

@@ -36,6 +36,13 @@
       "when": 1771211546095,
       "tag": "0004_spotty_maestro",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1771211904270,
+      "tag": "0005_faithful_lionheart",
+      "breakpoints": true
     }
   ]
 }

@@ -3,9 +3,10 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery } from "../drizzle/schema";
 import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
+import { storagePut } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -264,6 +265,51 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete contact submissions");
       return await deleteContactSubmission(input.id);
+    }),
+  }),
+  gallery: router({
+    list: publicProcedure.query(async () => {
+      return await getGalleryImages();
+    }),
+    featured: publicProcedure.input(z.object({ limit: z.number().optional() })).query(async ({ input }) => {
+      return await getFeaturedGalleryImages(input.limit || 6);
+    }),
+    upload: protectedProcedure.input(z.object({
+      title: z.string().min(1, "Title is required"),
+      description: z.string().optional(),
+      category: z.enum(["Match", "Training", "Event", "Team Photo", "Other"]),
+      featured: z.boolean().optional(),
+      fileData: z.string(),
+      fileName: z.string(),
+      mimeType: z.string(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can upload gallery images");
+      try {
+        const buffer = Buffer.from(input.fileData, "base64");
+        const fileKey = `gallery/${Date.now()}-${input.fileName}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+        const galleryImage: InsertGallery = {
+          title: input.title,
+          description: input.description || null,
+          imageUrl: url,
+          fileKey,
+          fileSize: buffer.length,
+          mimeType: input.mimeType,
+          category: input.category as any,
+          uploadedBy: ctx.user.id,
+          featured: input.featured ? 1 : 0,
+          displayOrder: 0,
+        };
+        await createGalleryImage(galleryImage);
+        return { success: true, url, message: "Image uploaded successfully" };
+      } catch (error) {
+        console.error("Gallery upload error:", error);
+        throw new Error("Failed to upload image");
+      }
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete gallery images");
+      return await deleteGalleryImage(input.id);
     }),
   }),
 });

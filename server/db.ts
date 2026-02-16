@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -275,4 +275,48 @@ export async function deleteContactSubmission(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(contactSubmissions).where(eq(contactSubmissions.id, id));
+}
+
+// Gallery queries
+export async function createGalleryImage(image: InsertGallery) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(gallery).values(image);
+}
+
+export async function getGalleryImages() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(gallery).orderBy(desc(gallery.displayOrder), desc(gallery.createdAt));
+}
+
+export async function getGalleryImageById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(gallery).where(eq(gallery.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getGalleryImagesByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(gallery).where(eq(gallery.category, category as any)).orderBy(desc(gallery.displayOrder));
+}
+
+export async function updateGalleryImage(id: number, updates: Partial<InsertGallery>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(gallery).set(updates).where(eq(gallery.id, id));
+}
+
+export async function deleteGalleryImage(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(gallery).where(eq(gallery.id, id));
+}
+
+export async function getFeaturedGalleryImages(limit: number = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(gallery).where(eq(gallery.featured, 1)).orderBy(desc(gallery.displayOrder)).limit(limit);
 }

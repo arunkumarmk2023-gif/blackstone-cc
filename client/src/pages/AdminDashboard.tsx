@@ -19,12 +19,14 @@ export default function AdminDashboard() {
   const [showFixtureForm, setShowFixtureForm] = useState(false);
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showNewsForm, setShowNewsForm] = useState(false);
+  const [showGalleryUpload, setShowGalleryUpload] = useState(false);
 
   const fixturesQuery = trpc.fixtures.list.useQuery();
   const playersQuery = trpc.players.list.useQuery();
   const newsQuery = trpc.news.list.useQuery();
   const newsletterQuery = trpc.newsletter.list.useQuery();
   const contactQuery = trpc.contact.list.useQuery();
+  const galleryQuery = trpc.gallery.list.useQuery();
   const deleteFixture = trpc.fixtures.delete.useMutation();
   const deletePlayer = trpc.players.delete.useMutation();
   const deleteNews = trpc.news.delete.useMutation();
@@ -35,44 +37,16 @@ export default function AdminDashboard() {
     }
   }, [user, authLoading, setLocation]);
 
-  const handleRefresh = () => {
-    fixturesQuery.refetch();
-    playersQuery.refetch();
-    newsQuery.refetch();
-  };
-
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1 py-20">
-          <div className="container">
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="animate-spin" />
-              <span>Loading...</span>
-            </div>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin w-8 h-8" />
       </div>
     );
   }
 
   if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1 py-20">
-          <div className="container">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-foreground mb-4">Access Denied</h1>
-              <p className="text-muted-foreground">You need admin privileges to access this page.</p>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -87,7 +61,7 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Manage fixtures, players, and news content
+              Manage fixtures, players, news, and gallery content
             </p>
           </div>
         </section>
@@ -96,24 +70,30 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
+                <TabsTrigger value="gallery">Gallery</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
               <TabsContent value="fixtures" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-foreground">Fixtures</h2>
-                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
+                  <button
+                    onClick={() => setShowFixtureForm(!showFixtureForm)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors"
+                  >
                     <Plus className="w-4 h-4" />
                     Add Fixture
                   </button>
                 </div>
+
+                {showFixtureForm && <SimpleFixtureForm onSuccess={() => { setShowFixtureForm(false); fixturesQuery.refetch(); }} />}
 
                 {fixturesQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -126,30 +106,26 @@ export default function AdminDashboard() {
                       <thead>
                         <tr className="border-b border-border">
                           <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
-                          <th className="text-left py-3 px-4 font-heading font-semibold">Opponent</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Team 1</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Team 2</th>
                           <th className="text-left py-3 px-4 font-heading font-semibold">Venue</th>
-                          <th className="text-left py-3 px-4 font-heading font-semibold">Status</th>
                           <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {fixturesQuery.data.map((fixture: any) => (
                           <tr key={fixture.id} className="border-b border-border hover:bg-card/50">
-                            <td className="py-3 px-4">{new Date(fixture.date).toLocaleDateString()}</td>
-                            <td className="py-3 px-4">{fixture.opponent}</td>
+                            <td className="py-3 px-4">{new Date(fixture.fixtureDate).toLocaleDateString()}</td>
+                            <td className="py-3 px-4">{fixture.team1}</td>
+                            <td className="py-3 px-4">{fixture.team2}</td>
                             <td className="py-3 px-4">{fixture.venue}</td>
                             <td className="py-3 px-4">
-                              <Badge variant="outline">{fixture.status}</Badge>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex gap-2">
-                                <button className="p-2 hover:bg-secondary rounded transition-colors">
-                                  <Edit className="w-4 h-4 text-accent" />
-                                </button>
-                                <button className="p-2 hover:bg-secondary rounded transition-colors">
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => deleteFixture.mutate({ id: fixture.id })}
+                                className="text-destructive hover:text-destructive/90"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -158,7 +134,7 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <Card className="p-8 text-center">
-                    <p className="text-muted-foreground">No fixtures yet. Create one to get started!</p>
+                    <p className="text-muted-foreground">No fixtures yet.</p>
                   </Card>
                 )}
               </TabsContent>
@@ -167,11 +143,16 @@ export default function AdminDashboard() {
               <TabsContent value="players" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-foreground">Players</h2>
-                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
+                  <button
+                    onClick={() => setShowPlayerForm(!showPlayerForm)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors"
+                  >
                     <Plus className="w-4 h-4" />
                     Add Player
                   </button>
                 </div>
+
+                {showPlayerForm && <SimplePlayerForm onSuccess={() => { setShowPlayerForm(false); playersQuery.refetch(); }} />}
 
                 {playersQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -179,34 +160,38 @@ export default function AdminDashboard() {
                     <span>Loading players...</span>
                   </div>
                 ) : playersQuery.data && playersQuery.data.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {playersQuery.data.map((player: any) => (
-                      <Card key={player.id} className="p-4 border-border">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="font-bold text-foreground">{player.name}</h3>
-                            <p className="text-sm text-muted-foreground">{player.role}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-secondary rounded transition-colors">
-                              <Edit className="w-4 h-4 text-accent" />
-                            </button>
-                            <button className="p-2 hover:bg-secondary rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <p>Jersey: #{player.jerseyNumber || "-"}</p>
-                          <p>Batting: {player.battingStyle || "-"}</p>
-                          <p>Bowling: {player.bowlingStyle || "-"}</p>
-                        </div>
-                      </Card>
-                    ))}
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Role</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Jersey Number</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {playersQuery.data.map((player: any) => (
+                          <tr key={player.id} className="border-b border-border hover:bg-card/50">
+                            <td className="py-3 px-4">{player.name}</td>
+                            <td className="py-3 px-4">{player.role}</td>
+                            <td className="py-3 px-4">{player.jerseyNumber}</td>
+                            <td className="py-3 px-4">
+                              <button
+                                onClick={() => deletePlayer.mutate({ id: player.id })}
+                                className="text-destructive hover:text-destructive/90"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
                   <Card className="p-8 text-center">
-                    <p className="text-muted-foreground">No players yet. Add one to get started!</p>
+                    <p className="text-muted-foreground">No players yet.</p>
                   </Card>
                 )}
               </TabsContent>
@@ -215,11 +200,16 @@ export default function AdminDashboard() {
               <TabsContent value="news" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-foreground">News</h2>
-                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
+                  <button
+                    onClick={() => setShowNewsForm(!showNewsForm)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors"
+                  >
                     <Plus className="w-4 h-4" />
                     Add News
                   </button>
                 </div>
+
+                {showNewsForm && <SimpleNewsForm onSuccess={() => { setShowNewsForm(false); newsQuery.refetch(); }} />}
 
                 {newsQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -228,129 +218,73 @@ export default function AdminDashboard() {
                   </div>
                 ) : newsQuery.data && newsQuery.data.length > 0 ? (
                   <div className="space-y-4">
-                    {newsQuery.data.map((item: any) => (
-                      <Card key={item.id} className="p-4 border-border">
+                    {newsQuery.data.map((article: any) => (
+                      <Card key={article.id} className="p-4">
                         <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">{item.summary}</p>
-                            <div className="flex gap-2 items-center">
-                              <Badge variant="outline" className="text-xs">{item.category}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : "Draft"}
-                              </span>
-                            </div>
+                          <div>
+                            <h3 className="font-heading font-semibold text-foreground">{article.title}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">{article.content.substring(0, 100)}...</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(article.publishedDate).toLocaleDateString()}
+                            </p>
                           </div>
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-secondary rounded transition-colors">
-                              <Edit className="w-4 h-4 text-accent" />
-                            </button>
-                            <button className="p-2 hover:bg-secondary rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => deleteNews.mutate({ id: article.id })}
+                            className="text-destructive hover:text-destructive/90"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </Card>
                     ))}
                   </div>
                 ) : (
                   <Card className="p-8 text-center">
-                    <p className="text-muted-foreground">No news yet. Create one to get started!</p>
+                    <p className="text-muted-foreground">No news articles yet.</p>
                   </Card>
                 )}
               </TabsContent>
 
               {/* Notifications Tab */}
               <TabsContent value="notifications" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
-                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
-                    <Plus className="w-4 h-4" />
-                    Send Notification
-                  </button>
-                </div>
-                <Card className="p-6 bg-secondary/50 border-border">
-                  <h3 className="font-heading font-semibold text-foreground mb-2">Notification Management</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Send important alerts to club members about match updates, announcements, and events.
-                  </p>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-heading text-foreground mb-2">Title</label>
-                      <input type="text" placeholder="Notification title" className="w-full px-3 py-2 rounded border border-border bg-background text-foreground" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-heading text-foreground mb-2">Message</label>
-                      <textarea placeholder="Notification message" rows={3} className="w-full px-3 py-2 rounded border border-border bg-background text-foreground" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-heading text-foreground mb-2">Type</label>
-                      <select className="w-full px-3 py-2 rounded border border-border bg-background text-foreground">
-                        <option>info</option>
-                        <option>success</option>
-                        <option>warning</option>
-                        <option>error</option>
-                        <option>match_alert</option>
-                        <option>announcement</option>
-                      </select>
-                    </div>
-                    <button className="w-full px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors">
-                      Send Notification
-                    </button>
-                  </div>
+                <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
+                <Card className="p-8 text-center">
+                  <p className="text-muted-foreground">Notification management coming soon.</p>
                 </Card>
               </TabsContent>
 
               {/* Newsletter Tab */}
               <TabsContent value="newsletter" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-foreground">Newsletter Subscribers</h2>
-                </div>
-
+                <h2 className="text-2xl font-bold text-foreground">Newsletter Subscribers</h2>
                 {newsletterQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="animate-spin" />
                     <span>Loading subscribers...</span>
                   </div>
                 ) : newsletterQuery.data && newsletterQuery.data.length > 0 ? (
-                  <div className="space-y-4">
-                    <Card className="p-4 bg-secondary/30">
-                      <p className="text-sm text-muted-foreground">
-                        Total Subscribers: <span className="font-bold text-foreground">{newsletterQuery.data.length}</span>
-                      </p>
-                    </Card>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-3 px-4 font-heading font-semibold">Email</th>
-                            <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
-                            <th className="text-left py-3 px-4 font-heading font-semibold">Subscribed</th>
-                            <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
-                            <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Email</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {newsletterQuery.data.map((subscriber: any) => (
+                          <tr key={subscriber.id} className="border-b border-border hover:bg-card/50">
+                            <td className="py-3 px-4">{subscriber.email}</td>
+                            <td className="py-3 px-4">{subscriber.name}</td>
+                            <td className="py-3 px-4">
+                              <Badge variant="outline">
+                                {subscriber.verified ? "Verified" : "Pending"}
+                              </Badge>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {newsletterQuery.data.map((subscriber: any) => (
-                            <tr key={subscriber.id} className="border-b border-border hover:bg-card/50">
-                              <td className="py-3 px-4">{subscriber.email}</td>
-                              <td className="py-3 px-4">{subscriber.name || "-"}</td>
-                              <td className="py-3 px-4">
-                                <Badge variant={subscriber.subscribed ? "default" : "outline"}>
-                                  {subscriber.subscribed ? "Active" : "Unsubscribed"}
-                                </Badge>
-                              </td>
-                              <td className="py-3 px-4 text-sm">{new Date(subscriber.subscribedAt).toLocaleDateString()}</td>
-                              <td className="py-3 px-4">
-                                <button className="p-2 hover:bg-secondary rounded transition-colors">
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
                   <Card className="p-8 text-center">
@@ -403,14 +337,91 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </TabsContent>
+
+              {/* Gallery Tab */}
+              <TabsContent value="gallery" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Gallery</h2>
+                  <button
+                    onClick={() => setShowGalleryUpload(!showGalleryUpload)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Upload Image
+                  </button>
+                </div>
+
+                {showGalleryUpload && (
+                  <Card className="p-6 bg-card border border-border">
+                    <h3 className="font-heading font-semibold mb-4">Upload Gallery Image</h3>
+                    <form className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Title</label>
+                        <input type="text" className="w-full px-3 py-2 border border-border rounded-md" required />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Description</label>
+                        <textarea className="w-full px-3 py-2 border border-border rounded-md" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Category</label>
+                        <select className="w-full px-3 py-2 border border-border rounded-md">
+                          <option value="Match">Match</option>
+                          <option value="Training">Training</option>
+                          <option value="Event">Event</option>
+                          <option value="Team Photo">Team Photo</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Image File</label>
+                        <input type="file" accept="image/*" className="w-full" required />
+                      </div>
+                      <button type="submit" className="px-4 py-2 bg-accent hover:bg-accent/90 text-accent-foreground rounded-md">
+                        Upload
+                      </button>
+                    </form>
+                  </Card>
+                )}
+
+                {galleryQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading gallery...</span>
+                  </div>
+                ) : galleryQuery.data && galleryQuery.data.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {galleryQuery.data.map((image: any) => (
+                      <Card key={image.id} className="overflow-hidden">
+                        <img src={image.imageUrl} alt={image.title} className="w-full h-48 object-cover" />
+                        <div className="p-4">
+                          <h3 className="font-heading font-semibold mb-2">{image.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">{image.description}</p>
+                          <Badge variant="outline" className="mb-3">{image.category}</Badge>
+                          <div className="flex gap-2">
+                            <button className="flex-1 px-3 py-1 text-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded">
+                              <Trash2 className="w-4 h-4 inline mr-1" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No gallery images yet. Upload your first image!</p>
+                  </Card>
+                )}
+              </TabsContent>
             </Tabs>
 
             {/* Info Box */}
             <Card className="mt-8 p-6 bg-secondary/50 border-border">
-              <h3 className="font-heading font-semibold text-foreground mb-2">Admin Features Coming Soon</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-2">Admin Features</h3>
               <p className="text-muted-foreground text-sm">
-                Full CRUD interfaces for adding, editing, and deleting fixtures, players, and news are being built. 
-                For now, you can manage content through the database directly or contact your developer.
+                File storage is now integrated with the gallery. Upload images directly from the Gallery tab. 
+                Images are stored securely in Manus S3 storage and displayed in your gallery.
               </p>
             </Card>
           </div>

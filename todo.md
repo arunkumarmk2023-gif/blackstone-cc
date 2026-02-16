@@ -36,3 +36,14 @@
 - [x] Write tests for contact storage functionality (8 tests passing)
 - [x] Test end-to-end contact form storage
 - [x] Save checkpoint with contact storage feature
+
+## File Storage Enhancement
+
+- [x] Verify full-stack setup and storage configuration
+- [x] Add gallery table to database schema for image uploads
+- [x] Create file upload helper functions and tRPC procedures
+- [x] Add file upload UI components to admin dashboard
+- [x] Implement gallery image upload and display
+- [x] Write tests for file storage functionality (9 tests passing)
+- [x] Test file uploads end-to-end
+- [x] Save checkpoint with file storage features
