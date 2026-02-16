@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   const playersQuery = trpc.players.list.useQuery();
   const newsQuery = trpc.news.list.useQuery();
   const newsletterQuery = trpc.newsletter.list.useQuery();
+  const contactQuery = trpc.contact.list.useQuery();
   const deleteFixture = trpc.fixtures.delete.useMutation();
   const deletePlayer = trpc.players.delete.useMutation();
   const deleteNews = trpc.news.delete.useMutation();
@@ -95,12 +96,13 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
+                <TabsTrigger value="contact">Contact</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
@@ -353,6 +355,51 @@ export default function AdminDashboard() {
                 ) : (
                   <Card className="p-8 text-center">
                     <p className="text-muted-foreground">No newsletter subscribers yet.</p>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Contact Submissions Tab */}
+              <TabsContent value="contact" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Contact Submissions</h2>
+                </div>
+
+                {contactQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading submissions...</span>
+                  </div>
+                ) : contactQuery.data && contactQuery.data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Email</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Subject</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contactQuery.data.map((submission: any) => (
+                          <tr key={submission.id} className="border-b border-border hover:bg-card/50">
+                            <td className="py-3 px-4">{new Date(submission.createdAt).toLocaleDateString()}</td>
+                            <td className="py-3 px-4">{submission.name}</td>
+                            <td className="py-3 px-4">{submission.email}</td>
+                            <td className="py-3 px-4">{submission.subject}</td>
+                            <td className="py-3 px-4">
+                              <Badge variant="outline">{submission.status}</Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No contact submissions yet.</p>
                   </Card>
                 )}
               </TabsContent>

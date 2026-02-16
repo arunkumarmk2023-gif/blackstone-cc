@@ -3,8 +3,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission } from "../drizzle/schema";
 import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
 
 export const appRouter = router({
@@ -209,6 +209,18 @@ export const appRouter = router({
       message: z.string().min(1, "Message is required"),
     })).mutation(async ({ input }) => {
       try {
+        // Save to database
+        const submission: InsertContactSubmission = {
+          name: input.name,
+          email: input.email,
+          phone: input.phone || null,
+          subject: input.subject,
+          message: input.message,
+          status: "new",
+        };
+        await createContactSubmission(submission);
+
+        // Send confirmation email
         const htmlContent = generateContactConfirmationEmail(input);
         const textContent = generateContactConfirmationEmailText(input);
         
@@ -220,18 +232,38 @@ export const appRouter = router({
         });
 
         if (!emailSent) {
-          console.warn("Confirmation email failed to send, but contact form was submitted");
+          console.warn("Confirmation email failed to send, but contact form was submitted and saved");
         }
 
         return {
           success: true,
-          message: "Your message has been received. Check your email for confirmation.",
+          message: "Your message has been received and saved. Check your email for confirmation.",
           emailSent,
         };
       } catch (error) {
         console.error("Error processing contact form:", error);
         throw new Error("Failed to process your message. Please try again.");
       }
+    }),
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view contact submissions");
+      return await getContactSubmissions();
+    }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view contact submissions");
+      return await getContactSubmissionById(input.id);
+    }),
+    updateStatus: protectedProcedure.input(z.object({
+      id: z.number(),
+      status: z.enum(["new", "read", "responded", "archived"]),
+      notes: z.string().optional(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update contact submissions");
+      return await updateContactSubmissionStatus(input.id, input.status, input.notes, ctx.user.id);
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete contact submissions");
+      return await deleteContactSubmission(input.id);
     }),
   }),
 });

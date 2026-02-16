@@ -25,3 +25,14 @@
 - [x] Write tests for email functionality (10 tests passing)
 - [x] Test email delivery in browser (form submission working)
 - [x] Save checkpoint with email automation
+
+## Contact Form Database Storage
+
+- [x] Design and add contactSubmissions table to Drizzle schema
+- [x] Create database helper functions for contact operations
+- [x] Update contact.submit procedure to save submissions to database
+- [x] Add admin view/list endpoint for contact submissions
+- [x] Create admin dashboard component to view submissions
+- [x] Write tests for contact storage functionality (8 tests passing)
+- [x] Test end-to-end contact form storage
+- [x] Save checkpoint with contact storage feature

@@ -29,6 +29,13 @@
       "when": 1771103155018,
       "tag": "0003_closed_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1771211546095,
+      "tag": "0004_spotty_maestro",
+      "breakpoints": true
     }
   ]
 }
