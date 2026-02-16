@@ -8,22 +8,37 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Plus, Edit, Trash2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import SimpleFixtureForm from "@/components/SimpleFixtureForm";
+import SimplePlayerForm from "@/components/SimplePlayerForm";
+import SimpleNewsForm from "@/components/SimpleNewsForm";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("fixtures");
+  const [showFixtureForm, setShowFixtureForm] = useState(false);
+  const [showPlayerForm, setShowPlayerForm] = useState(false);
+  const [showNewsForm, setShowNewsForm] = useState(false);
 
   const fixturesQuery = trpc.fixtures.list.useQuery();
   const playersQuery = trpc.players.list.useQuery();
   const newsQuery = trpc.news.list.useQuery();
   const newsletterQuery = trpc.newsletter.list.useQuery();
+  const deleteFixture = trpc.fixtures.delete.useMutation();
+  const deletePlayer = trpc.players.delete.useMutation();
+  const deleteNews = trpc.news.delete.useMutation();
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "admin")) {
       setLocation("/");
     }
   }, [user, authLoading, setLocation]);
+
+  const handleRefresh = () => {
+    fixturesQuery.refetch();
+    playersQuery.refetch();
+    newsQuery.refetch();
+  };
 
   if (authLoading) {
     return (
