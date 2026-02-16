@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber } from "./db";
 import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber } from "../drizzle/schema";
+import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
 
 export const appRouter = router({
   system: systemRouter,
@@ -196,6 +197,41 @@ export const appRouter = router({
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete subscribers");
       return deleteNewsletterSubscriber(input.id);
+    }),
+  }),
+
+  contact: router({
+    submit: publicProcedure.input(z.object({
+      name: z.string().min(1, "Name is required"),
+      email: z.string().email("Valid email is required"),
+      phone: z.string().optional(),
+      subject: z.string().min(1, "Subject is required"),
+      message: z.string().min(1, "Message is required"),
+    })).mutation(async ({ input }) => {
+      try {
+        const htmlContent = generateContactConfirmationEmail(input);
+        const textContent = generateContactConfirmationEmailText(input);
+        
+        const emailSent = await sendEmail({
+          to: input.email,
+          subject: "We received your message - Blackstone Cricket Club",
+          html: htmlContent,
+          text: textContent,
+        });
+
+        if (!emailSent) {
+          console.warn("Confirmation email failed to send, but contact form was submitted");
+        }
+
+        return {
+          success: true,
+          message: "Your message has been received. Check your email for confirmation.",
+          emailSent,
+        };
+      } catch (error) {
+        console.error("Error processing contact form:", error);
+        throw new Error("Failed to process your message. Please try again.");
+      }
     }),
   }),
 });

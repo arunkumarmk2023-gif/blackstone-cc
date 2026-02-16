@@ -1,17 +1,46 @@
 /* Heritage Grain Design: Contact page with form and details */
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const submitContact = trpc.contact.submit.useMutation({
+    onSuccess: () => {
+      toast.success("Message sent! We'll get back to you soon. Check your email for confirmation.");
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      setIsSubmitting(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to send message. Please try again.");
+      setIsSubmitting(false);
+    },
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent! We'll get back to you soon.");
+    setIsSubmitting(true);
+    await submitContact.mutateAsync(formData);
   };
 
   return (
@@ -90,6 +119,8 @@ export default function Contact() {
                       type="text"
                       placeholder="John Doe"
                       required
+                      value={formData.name}
+                      onChange={handleChange}
                       className="bg-background border-border"
                     />
                   </div>
@@ -102,6 +133,8 @@ export default function Contact() {
                       type="email"
                       placeholder="john@example.com"
                       required
+                      value={formData.email}
+                      onChange={handleChange}
                       className="bg-background border-border"
                     />
                   </div>
@@ -115,6 +148,8 @@ export default function Contact() {
                     id="phone"
                     type="tel"
                     placeholder="+1 (234) 567-890"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="bg-background border-border"
                   />
                 </div>
@@ -128,6 +163,8 @@ export default function Contact() {
                     type="text"
                     placeholder="Inquiry about membership"
                     required
+                    value={formData.subject}
+                    onChange={handleChange}
                     className="bg-background border-border"
                   />
                 </div>
@@ -141,6 +178,8 @@ export default function Contact() {
                     placeholder="Tell us how we can help..."
                     rows={6}
                     required
+                    value={formData.message}
+                    onChange={handleChange}
                     className="bg-background border-border resize-none"
                   />
                 </div>
@@ -148,10 +187,20 @@ export default function Contact() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading"
+                  disabled={isSubmitting}
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="mr-2 h-5 w-5" />
-                  Send Message
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-5 w-5" />
+                      Send Message
+                    </>
+                  )}
                 </Button>
               </form>
             </Card>
