@@ -47,3 +47,12 @@
 - [x] Write tests for file storage functionality (9 tests passing)
 - [x] Test file uploads end-to-end
 - [x] Save checkpoint with file storage features
+
+## Weather Widget Refactoring
+
+- [x] Locate and review current weather component
+- [x] Create compact weather widget component
+- [x] Add weather widget to Navigation header top right
+- [x] Remove weather component from Home page
+- [x] Style and test weather widget
+- [x] Save checkpoint with weather widget changes

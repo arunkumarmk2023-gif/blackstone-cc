@@ -2,7 +2,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import WeatherWidget from "@/components/WeatherWidget";
+
 import NotificationCenter from "@/components/NotificationCenter";
 import NewsletterForm from "@/components/NewsletterForm";
 import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
@@ -74,13 +74,6 @@ export default function Home() {
             </a>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Weather Widget */}
-      <section className="py-12 bg-background border-b border-border">
-        <div className="container">
-          <WeatherWidget />
         </div>
       </section>
 
