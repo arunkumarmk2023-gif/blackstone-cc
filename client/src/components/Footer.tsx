@@ -116,10 +116,10 @@ export default function Footer() {
                 title="Threads"
                 className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
               >
-                <AtSign className="w-5 h-5" />
+                <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/nBcZRlTyTjNLMmRR.png" alt="Threads" className="w-5 h-5" />
               </a>
               <a
-                href="mailto:blackstonecricketclub@myyahoo.com"
+                href="mailto:blackstonecricketclub@myyahoo.com?subject=Blackstone%20CC%20Inquiry"
                 title="Email"
                 className="w-10 h-10 rounded-lg bg-secondary hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center"
               >

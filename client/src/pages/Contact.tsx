@@ -42,7 +42,7 @@ export default function Contact() {
               </div>
               <h3 className="font-heading font-semibold text-lg text-foreground mb-2">Email</h3>
               <a
-                href="mailto:blackstonecricketclub@myyahoo.com"
+                href="mailto:blackstonecricketclub@myyahoo.com?subject=Blackstone%20CC%20Inquiry"
                 className="text-muted-foreground hover:text-accent transition-colors"
               >
                 blackstonecricketclub@myyahoo.com
