@@ -27,9 +27,11 @@ export default function AdminDashboard() {
   const newsletterQuery = trpc.newsletter.list.useQuery();
   const contactQuery = trpc.contact.list.useQuery();
   const galleryQuery = trpc.gallery.list.useQuery();
+  const joinRequestsQuery = trpc.joinClub.list.useQuery();
   const deleteFixture = trpc.fixtures.delete.useMutation();
   const deletePlayer = trpc.players.delete.useMutation();
   const deleteNews = trpc.news.delete.useMutation();
+  const deleteJoinRequest = trpc.joinClub.delete.useMutation();
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "admin")) {
@@ -70,13 +72,14 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
+                <TabsTrigger value="joinRequests">Join Requests</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
               </TabsList>
 
@@ -338,6 +341,62 @@ export default function AdminDashboard() {
                 )}
               </TabsContent>
 
+              {/* Join Requests Tab */}
+              <TabsContent value="joinRequests" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Join Requests</h2>
+                </div>
+
+                {joinRequestsQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading join requests...</span>
+                  </div>
+                ) : joinRequestsQuery.data && joinRequestsQuery.data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Name</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Email</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Role</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Experience</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Status</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {joinRequestsQuery.data.map((request: any) => (
+                          <tr key={request.id} className="border-b border-border hover:bg-card/50">
+                            <td className="py-3 px-4">{new Date(request.createdAt).toLocaleDateString()}</td>
+                            <td className="py-3 px-4">{request.name}</td>
+                            <td className="py-3 px-4">{request.email}</td>
+                            <td className="py-3 px-4 capitalize">{request.role}</td>
+                            <td className="py-3 px-4 capitalize">{request.experience}</td>
+                            <td className="py-3 px-4">
+                              <Badge variant="outline">{request.status}</Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <button
+                                onClick={() => deleteJoinRequest.mutate({ id: request.id }, { onSuccess: () => joinRequestsQuery.refetch() })}
+                                className="text-destructive hover:text-destructive/90"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No join requests yet.</p>
+                  </Card>
+                )}
+              </TabsContent>
+
               {/* Gallery Tab */}
               <TabsContent value="gallery" className="space-y-6">
                 <div className="flex justify-between items-center">
@@ -420,7 +479,7 @@ export default function AdminDashboard() {
             <Card className="mt-8 p-6 bg-secondary/50 border-border">
               <h3 className="font-heading font-semibold text-foreground mb-2">Admin Features</h3>
               <p className="text-muted-foreground text-sm">
-                File storage is now integrated with the gallery. Upload images directly from the Gallery tab. 
+                File storage is now integrated with the gallery. Upload images directly from the Gallery tab.
                 Images are stored securely in Manus S3 storage and displayed in your gallery.
               </p>
             </Card>

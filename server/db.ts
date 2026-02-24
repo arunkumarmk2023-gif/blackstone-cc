@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery, joinRequests, InsertJoinRequest } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -319,4 +319,38 @@ export async function getFeaturedGalleryImages(limit: number = 6) {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(gallery).where(eq(gallery.featured, 1)).orderBy(desc(gallery.displayOrder)).limit(limit);
+}
+
+// Join requests queries
+export async function createJoinRequest(request: InsertJoinRequest) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(joinRequests).values(request);
+}
+
+export async function getJoinRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(joinRequests).orderBy(desc(joinRequests.createdAt));
+}
+
+export async function getJoinRequestById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(joinRequests).where(eq(joinRequests.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateJoinRequestStatus(id: number, status: string, notes?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const updateData: Record<string, unknown> = { status };
+  if (notes) updateData.notes = notes;
+  return await db.update(joinRequests).set(updateData).where(eq(joinRequests.id, id));
+}
+
+export async function deleteJoinRequest(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(joinRequests).where(eq(joinRequests.id, id));
 }

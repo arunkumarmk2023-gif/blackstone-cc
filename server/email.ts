@@ -235,3 +235,153 @@ If you have any additional questions or information to add, feel free to reply t
 Connecticut Cricket League | Hard Tennis Ball Division
   `.trim();
 }
+
+/**
+ * Generate HTML template for join club confirmation email
+ */
+export function generateJoinConfirmationEmail(data: {
+  name: string;
+  email: string;
+  role: string;
+  experience: string;
+  message: string;
+}): string {
+  const roleLabels: Record<string, string> = {
+    batsman: 'Batsman',
+    bowler: 'Bowler',
+    allrounder: 'All-Rounder',
+    wicketkeeper: 'Wicketkeeper',
+    supporter: 'Supporter',
+  };
+  const experienceLabels: Record<string, string> = {
+    beginner: 'Beginner',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+  };
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            color: #1a1410;
+            margin: 0;
+            font-size: 28px;
+          }
+          .content {
+            margin-bottom: 30px;
+          }
+          .content p {
+            margin: 10px 0;
+          }
+          .section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #d4af37;
+            margin: 20px 0;
+          }
+          .section-title {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+          .footer {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Blackstone Cricket Club</h1>
+            <p style="color: #666; margin: 5px 0;">Application Received</p>
+          </div>
+
+          <div class="content">
+            <p>Hello <strong>${data.name}</strong>,</p>
+            
+            <p>Thank you for your interest in joining Blackstone Cricket Club! We have received your application and are excited to hear from you.</p>
+            
+            <p>Our team will review your application and reach out to you about upcoming trials and training sessions. We typically respond within a few days.</p>
+
+            <div class="section">
+              <div class="section-title">Your Application Summary</div>
+              <p><strong>Playing Role:</strong> ${roleLabels[data.role] || data.role}</p>
+              <p><strong>Experience Level:</strong> ${experienceLabels[data.experience] || data.experience}</p>
+              <p><strong>About You:</strong></p>
+              <p>${data.message.replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <p>In the meantime, follow us on social media to stay updated on club activities and upcoming events!</p>
+          </div>
+
+          <div class="footer">
+            <p>© 2026 Blackstone Cricket Club. All rights reserved.</p>
+            <p>Connecticut Cricket League | Hard Tennis Ball Division</p>
+            <p>
+              <a href="https://www.facebook.com/profile.php?id=61571168053666" style="color: #d4af37; text-decoration: none; margin: 0 10px;">Facebook</a>
+              <a href="https://www.instagram.com/blackstone_cricket_club/" style="color: #d4af37; text-decoration: none; margin: 0 10px;">Instagram</a>
+              <a href="https://www.threads.com/@blackstone_cricket_club" style="color: #d4af37; text-decoration: none; margin: 0 10px;">Threads</a>
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Generate plain text version of join confirmation email
+ */
+export function generateJoinConfirmationEmailText(data: {
+  name: string;
+  email: string;
+  role: string;
+  experience: string;
+  message: string;
+}): string {
+  return `
+Hello ${data.name},
+
+Thank you for your interest in joining Blackstone Cricket Club! We have received your application and are excited to hear from you.
+
+Our team will review your application and reach out to you about upcoming trials and training sessions.
+
+--- YOUR APPLICATION SUMMARY ---
+Playing Role: ${data.role}
+Experience Level: ${data.experience}
+About You:
+${data.message}
+
+In the meantime, follow us on social media to stay updated on club activities and upcoming events!
+
+© 2026 Blackstone Cricket Club. All rights reserved.
+Connecticut Cricket League | Hard Tennis Ball Division
+  `.trim();
+}

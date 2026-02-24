@@ -175,3 +175,23 @@ export const gallery = mysqlTable("gallery", {
 
 export type Gallery = typeof gallery.$inferSelect;
 export type InsertGallery = typeof gallery.$inferInsert;
+
+/**
+ * Join requests table for storing club membership applications
+ */
+export const joinRequests = mysqlTable("joinRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  role: varchar("role", { length: 50 }).notNull(),
+  experience: varchar("experience", { length: 50 }).notNull(),
+  message: text("message").notNull(),
+  status: mysqlEnum("status", ["new", "contacted", "accepted", "rejected"]).default("new").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type JoinRequest = typeof joinRequests.$inferSelect;
+export type InsertJoinRequest = typeof joinRequests.$inferInsert;

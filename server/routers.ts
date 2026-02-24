@@ -3,9 +3,9 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery } from "../drizzle/schema";
-import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoinRequest, getJoinRequests, getJoinRequestById, updateJoinRequestStatus, deleteJoinRequest } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoinRequest } from "../drizzle/schema";
+import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText, generateJoinConfirmationEmail, generateJoinConfirmationEmailText } from "./email";
 import { storagePut } from "./storage";
 
 export const appRouter = router({
@@ -224,7 +224,7 @@ export const appRouter = router({
         // Send confirmation email
         const htmlContent = generateContactConfirmationEmail(input);
         const textContent = generateContactConfirmationEmailText(input);
-        
+
         const emailSent = await sendEmail({
           to: input.email,
           subject: "We received your message - Blackstone Cricket Club",
@@ -310,6 +310,71 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete gallery images");
       return await deleteGalleryImage(input.id);
+    }),
+  }),
+
+  joinClub: router({
+    submit: publicProcedure.input(z.object({
+      name: z.string().min(1, "Name is required"),
+      email: z.string().email("Valid email is required"),
+      phone: z.string().optional(),
+      role: z.string().min(1, "Playing role is required"),
+      experience: z.string().min(1, "Experience level is required"),
+      message: z.string().min(1, "Message is required"),
+    })).mutation(async ({ input }) => {
+      try {
+        // Save to database
+        const joinRequest: InsertJoinRequest = {
+          name: input.name,
+          email: input.email,
+          phone: input.phone || null,
+          role: input.role,
+          experience: input.experience,
+          message: input.message,
+          status: "new",
+        };
+        await createJoinRequest(joinRequest);
+
+        // Send confirmation email
+        const htmlContent = generateJoinConfirmationEmail(input);
+        const textContent = generateJoinConfirmationEmailText(input);
+
+        const emailSent = await sendEmail({
+          to: input.email,
+          subject: "Application Received - Blackstone Cricket Club",
+          html: htmlContent,
+          text: textContent,
+        });
+
+        if (!emailSent) {
+          console.warn("Confirmation email failed to send, but join request was saved");
+        }
+
+        return {
+          success: true,
+          message: "Your application has been received! We'll be in touch about trials and training.",
+          emailSent,
+        };
+      } catch (error) {
+        console.error("Error processing join request:", error);
+        throw new Error("Failed to process your application. Please try again.");
+      }
+    }),
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view join requests");
+      return await getJoinRequests();
+    }),
+    updateStatus: protectedProcedure.input(z.object({
+      id: z.number(),
+      status: z.enum(["new", "contacted", "accepted", "rejected"]),
+      notes: z.string().optional(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update join requests");
+      return await updateJoinRequestStatus(input.id, input.status, input.notes);
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete join requests");
+      return await deleteJoinRequest(input.id);
     }),
   }),
 });

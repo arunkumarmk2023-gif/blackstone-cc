@@ -12,9 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, Users, Calendar, Trophy, Mail } from "lucide-react";
+import { Check, Users, Calendar, Trophy, Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function JoinUs() {
   const [formData, setFormData] = useState({
@@ -27,6 +28,25 @@ export default function JoinUs() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const submitJoinRequest = trpc.joinClub.submit.useMutation({
+    onSuccess: () => {
+      toast.success("Thank you! We'll contact you soon about trials and training.");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        role: "",
+        experience: "",
+        message: "",
+      });
+      setIsSubmitting(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to submit application. Please try again.");
+      setIsSubmitting(false);
+    },
+  });
 
   const benefits = [
     "Compete in Connecticut Cricket League matches",
@@ -82,20 +102,7 @@ export default function JoinUs() {
     }
 
     setIsSubmitting(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      toast.success("Thank you! We'll contact you soon about trials and training.");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        role: "",
-        experience: "",
-        message: "",
-      });
-      setIsSubmitting(false);
-    }, 1000);
+    await submitJoinRequest.mutateAsync(formData);
   };
 
   return (
@@ -109,8 +116,8 @@ export default function JoinUs() {
             Join Blackstone CC
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
-            Become part of Connecticut's premier cricket club. Whether you're an experienced player 
-            or looking to develop your game, we welcome passionate cricketers to our squad. 
+            Become part of Connecticut's premier cricket club. Whether you're an experienced player
+            or looking to develop your game, we welcome passionate cricketers to our squad.
             Social players and supporters are also welcome!
           </p>
         </div>
@@ -125,13 +132,13 @@ export default function JoinUs() {
                 Why Join Blackstone CC?
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                Blackstone Cricket Club offers a competitive yet welcoming environment for cricketers 
-                in Connecticut. We compete in the CCL Hard Tennis Ball division and provide opportunities 
+                Blackstone Cricket Club offers a competitive yet welcoming environment for cricketers
+                in Connecticut. We compete in the CCL Hard Tennis Ball division and provide opportunities
                 for players to develop their skills while being part of a supportive team.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Our club values excellence, sportsmanship, and camaraderie. We're more than just a 
-                cricket team—we're a community of players who share a love for the game and support 
+                Our club values excellence, sportsmanship, and camaraderie. We're more than just a
+                cricket team—we're a community of players who share a love for the game and support
                 each other both on and off the field.
               </p>
             </div>
