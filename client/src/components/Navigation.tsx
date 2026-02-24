@@ -40,15 +40,14 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.slice(0, 6).map((link) => (
+            {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${
-                  location === link.href
+                className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${location === link.href
                     ? "bg-accent text-accent-foreground font-semibold"
                     : "text-foreground hover:bg-secondary hover:text-accent"
-                }`}
+                  }`}
               >
                 {link.label}
               </a>
@@ -78,11 +77,10 @@ export default function Navigation() {
               <a
                 key={link.href}
                 href={link.href}
-                className={`block px-4 py-3 rounded-lg font-heading transition-all ${
-                  location === link.href
+                className={`block px-4 py-3 rounded-lg font-heading transition-all ${location === link.href
                     ? "bg-accent text-accent-foreground font-semibold"
                     : "text-foreground hover:bg-secondary hover:text-accent"
-                }`}
+                  }`}
               >
                 {link.label}
               </a>
