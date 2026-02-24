@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import SimpleFixtureForm from "@/components/SimpleFixtureForm";
 import SimplePlayerForm from "@/components/SimplePlayerForm";
 import SimpleNewsForm from "@/components/SimpleNewsForm";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -32,6 +33,15 @@ export default function AdminDashboard() {
   const deletePlayer = trpc.players.delete.useMutation();
   const deleteNews = trpc.news.delete.useMutation();
   const deleteJoinRequest = trpc.joinClub.delete.useMutation();
+  const deleteGallery = trpc.gallery.delete.useMutation();
+  const uploadGallery = trpc.gallery.upload.useMutation();
+
+  // Gallery upload form state
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const [galleryDescription, setGalleryDescription] = useState("");
+  const [galleryCategory, setGalleryCategory] = useState<"Match" | "Training" | "Event" | "Team Photo" | "Other">("Match");
+  const [galleryFile, setGalleryFile] = useState<File | null>(null);
+  const [galleryUploading, setGalleryUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "admin")) {
@@ -413,18 +423,54 @@ export default function AdminDashboard() {
                 {showGalleryUpload && (
                   <Card className="p-6 bg-card border border-border">
                     <h3 className="font-heading font-semibold mb-4">Upload Gallery Image</h3>
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!galleryFile) { toast.error("Please select an image file"); return; }
+                      setGalleryUploading(true);
+                      try {
+                        const reader = new FileReader();
+                        reader.onload = async () => {
+                          try {
+                            const base64 = (reader.result as string).split(",")[1];
+                            await uploadGallery.mutateAsync({
+                              title: galleryTitle,
+                              description: galleryDescription || undefined,
+                              category: galleryCategory,
+                              fileData: base64,
+                              fileName: galleryFile.name,
+                              mimeType: galleryFile.type,
+                            });
+                            toast.success("Image uploaded successfully!");
+                            setGalleryTitle("");
+                            setGalleryDescription("");
+                            setGalleryCategory("Match");
+                            setGalleryFile(null);
+                            setShowGalleryUpload(false);
+                            galleryQuery.refetch();
+                          } catch (err) {
+                            toast.error("Failed to upload image");
+                          } finally {
+                            setGalleryUploading(false);
+                          }
+                        };
+                        reader.onerror = () => { toast.error("Failed to read file"); setGalleryUploading(false); };
+                        reader.readAsDataURL(galleryFile);
+                      } catch {
+                        toast.error("Failed to upload image");
+                        setGalleryUploading(false);
+                      }
+                    }}>
                       <div>
                         <label className="block text-sm font-medium mb-2">Title</label>
-                        <input type="text" className="w-full px-3 py-2 border border-border rounded-md" required />
+                        <input type="text" className="w-full px-3 py-2 border border-border rounded-md" required value={galleryTitle} onChange={(e) => setGalleryTitle(e.target.value)} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Description</label>
-                        <textarea className="w-full px-3 py-2 border border-border rounded-md" />
+                        <textarea className="w-full px-3 py-2 border border-border rounded-md" value={galleryDescription} onChange={(e) => setGalleryDescription(e.target.value)} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Category</label>
-                        <select className="w-full px-3 py-2 border border-border rounded-md">
+                        <select className="w-full px-3 py-2 border border-border rounded-md" value={galleryCategory} onChange={(e) => setGalleryCategory(e.target.value as any)}>
                           <option value="Match">Match</option>
                           <option value="Training">Training</option>
                           <option value="Event">Event</option>
@@ -434,10 +480,10 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Image File</label>
-                        <input type="file" accept="image/*" className="w-full" required />
+                        <input type="file" accept="image/*" className="w-full" required onChange={(e) => setGalleryFile(e.target.files?.[0] || null)} />
                       </div>
-                      <button type="submit" className="px-4 py-2 bg-accent hover:bg-accent/90 text-accent-foreground rounded-md">
-                        Upload
+                      <button type="submit" disabled={galleryUploading} className="px-4 py-2 bg-accent hover:bg-accent/90 text-accent-foreground rounded-md disabled:opacity-50">
+                        {galleryUploading ? "Uploading..." : "Upload"}
                       </button>
                     </form>
                   </Card>
@@ -458,7 +504,14 @@ export default function AdminDashboard() {
                           <p className="text-sm text-muted-foreground mb-3">{image.description}</p>
                           <Badge variant="outline" className="mb-3">{image.category}</Badge>
                           <div className="flex gap-2">
-                            <button className="flex-1 px-3 py-1 text-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded">
+                            <button
+                              onClick={() => {
+                                if (confirm("Delete this image?")) {
+                                  deleteGallery.mutate({ id: image.id }, { onSuccess: () => { galleryQuery.refetch(); toast.success("Image deleted"); } });
+                                }
+                              }}
+                              className="flex-1 px-3 py-1 text-sm bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded"
+                            >
                               <Trash2 className="w-4 h-4 inline mr-1" />
                               Delete
                             </button>
