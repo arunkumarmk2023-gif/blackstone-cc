@@ -43,6 +43,13 @@
       "when": 1771211904270,
       "tag": "0005_faithful_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1772329851496,
+      "tag": "0006_tidy_mac_gargan",
+      "breakpoints": true
     }
   ]
 }

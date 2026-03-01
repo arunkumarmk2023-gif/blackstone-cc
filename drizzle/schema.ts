@@ -177,21 +177,20 @@ export type Gallery = typeof gallery.$inferSelect;
 export type InsertGallery = typeof gallery.$inferInsert;
 
 /**
- * Join requests table for storing club membership applications
+ * Joiners table for storing club membership applications
  */
-export const joinRequests = mysqlTable("joinRequests", {
+export const joiners = mysqlTable("joiners", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   phone: varchar("phone", { length: 20 }),
-  role: varchar("role", { length: 50 }).notNull(),
-  experience: varchar("experience", { length: 50 }).notNull(),
+  role: varchar("role", { length: 50 }).notNull(), // batsman, bowler, allrounder, wicketkeeper, supporter
+  experience: varchar("experience", { length: 50 }).notNull(), // beginner, intermediate, advanced, professional
   message: text("message").notNull(),
-  status: mysqlEnum("status", ["new", "contacted", "accepted", "rejected"]).default("new").notNull(),
-  notes: text("notes"),
+  status: mysqlEnum("status", ["new", "reviewed", "accepted", "rejected", "archived"]).default("new").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type JoinRequest = typeof joinRequests.$inferSelect;
-export type InsertJoinRequest = typeof joinRequests.$inferInsert;
+export type Joiner = typeof joiners.$inferSelect;
+export type InsertJoiner = typeof joiners.$inferInsert;

@@ -34,7 +34,7 @@ export default function Navigation() {
             />
             <div className="hidden sm:block">
               <div className="font-display font-bold text-xl text-foreground">Blackstone CC</div>
-              <div className="text-xs text-muted-foreground font-heading">Connecticut Cricket League</div>
+              <div className="text-xs text-muted-foreground font-heading">Manchester, CT</div>
             </div>
           </a>
 

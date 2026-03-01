@@ -28,11 +28,11 @@ export default function AdminDashboard() {
   const newsletterQuery = trpc.newsletter.list.useQuery();
   const contactQuery = trpc.contact.list.useQuery();
   const galleryQuery = trpc.gallery.list.useQuery();
-  const joinRequestsQuery = trpc.joinClub.list.useQuery();
+  const joinersQuery = trpc.joiners.list.useQuery();
   const deleteFixture = trpc.fixtures.delete.useMutation();
   const deletePlayer = trpc.players.delete.useMutation();
   const deleteNews = trpc.news.delete.useMutation();
-  const deleteJoinRequest = trpc.joinClub.delete.useMutation();
+  const deleteJoiner = trpc.joiners.delete.useMutation();
   const deleteGallery = trpc.gallery.delete.useMutation();
   const uploadGallery = trpc.gallery.upload.useMutation();
 
@@ -91,6 +91,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="joinRequests">Join Requests</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                <TabsTrigger value="joiners">Joiners</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
@@ -523,6 +524,57 @@ export default function AdminDashboard() {
                 ) : (
                   <Card className="p-8 text-center">
                     <p className="text-muted-foreground">No gallery images yet. Upload your first image!</p>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Joiners Tab */}
+              <TabsContent value="joiners" className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Join Applications</h2>
+                  <p className="text-muted-foreground mb-6">Manage membership applications from players interested in joining Blackstone CC.</p>
+                </div>
+
+                {joinersQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading applications...</span>
+                  </div>
+                ) : joinersQuery.data && joinersQuery.data.length > 0 ? (
+                  <div className="space-y-4">
+                    {joinersQuery.data.map((joiner: any) => (
+                      <Card key={joiner.id} className="p-6 bg-card border-border">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-heading font-semibold text-foreground text-lg">{joiner.name}</h3>
+                            <p className="text-sm text-muted-foreground">{joiner.email}</p>
+                            {joiner.phone && <p className="text-sm text-muted-foreground">{joiner.phone}</p>}
+                          </div>
+                          <Badge variant="outline" className="ml-2">
+                            {joiner.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Playing Role</p>
+                            <p className="font-medium text-foreground capitalize">{joiner.role}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Experience Level</p>
+                            <p className="font-medium text-foreground capitalize">{joiner.experience}</p>
+                          </div>
+                        </div>
+                        <div className="mb-4">
+                          <p className="text-xs text-muted-foreground mb-2">Message</p>
+                          <p className="text-sm text-foreground bg-background/50 p-3 rounded">{joiner.message}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">Applied on {new Date(joiner.createdAt).toLocaleDateString()}</p>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No join applications yet.</p>
                   </Card>
                 )}
               </TabsContent>

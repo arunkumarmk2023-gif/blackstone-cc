@@ -56,3 +56,25 @@
 - [x] Remove weather component from Home page
 - [x] Style and test weather widget
 - [x] Save checkpoint with weather widget changes
+
+## Drag-and-Drop Bulk Image Upload
+
+- [ ] Create drag-and-drop upload component
+- [ ] Implement file validation (type, size, count)
+- [ ] Add progress tracking UI with upload status
+- [ ] Create tRPC batch upload procedure
+- [ ] Integrate bulk upload into admin gallery tab
+- [ ] Write tests for bulk upload functionality
+- [ ] Test drag-and-drop end-to-end
+- [ ] Save checkpoint with bulk upload feature
+
+## Fix Join Us Form Storage
+
+- [x] Review current Join Us form implementation
+- [x] Create joiners table in database schema
+- [x] Add database helper functions for joiner operations
+- [x] Create tRPC procedure to save joiner submissions
+- [x] Update Join Us form to submit to backend
+- [x] Add joiner management view to admin dashboard
+- [x] Write and run tests for joiner functionality (8 tests passing)
+- [x] Test end-to-end and save checkpoint

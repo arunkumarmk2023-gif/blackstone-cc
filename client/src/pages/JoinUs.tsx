@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, Users, Calendar, Trophy, Mail, Loader2 } from "lucide-react";
+import { Check, Users, Calendar, Trophy, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
@@ -29,9 +29,9 @@ export default function JoinUs() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitJoinRequest = trpc.joinClub.submit.useMutation({
-    onSuccess: () => {
-      toast.success("Thank you! We'll contact you soon about trials and training.");
+  const submitJoiner = trpc.joiners.submit.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
       setFormData({
         name: "",
         email: "",
@@ -42,8 +42,8 @@ export default function JoinUs() {
       });
       setIsSubmitting(false);
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to submit application. Please try again.");
+    onError: (error) => {
+      toast.error(error.message || "Failed to submit application");
       setIsSubmitting(false);
     },
   });
@@ -102,7 +102,16 @@ export default function JoinUs() {
     }
 
     setIsSubmitting(true);
-    await submitJoinRequest.mutateAsync(formData);
+
+    // Submit to backend
+    await submitJoiner.mutateAsync({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone || undefined,
+      role: formData.role as any,
+      experience: formData.experience as any,
+      message: formData.message,
+    });
   };
 
   return (
@@ -116,8 +125,8 @@ export default function JoinUs() {
             Join Blackstone CC
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
-            Become part of Connecticut's premier cricket club. Whether you're an experienced player
-            or looking to develop your game, we welcome passionate cricketers to our squad.
+            Become part of Connecticut's premier cricket club. Whether you're an experienced player 
+            or looking to develop your game, we welcome passionate cricketers to our squad. 
             Social players and supporters are also welcome!
           </p>
         </div>
@@ -132,13 +141,13 @@ export default function JoinUs() {
                 Why Join Blackstone CC?
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                Blackstone Cricket Club offers a competitive yet welcoming environment for cricketers
-                in Connecticut. We compete in the CCL Hard Tennis Ball division and provide opportunities
+                Blackstone Cricket Club offers a competitive yet welcoming environment for cricketers 
+                in Connecticut. We compete in the CCL Hard Tennis Ball division and provide opportunities 
                 for players to develop their skills while being part of a supportive team.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Our club values excellence, sportsmanship, and camaraderie. We're more than just a
-                cricket team—we're a community of players who share a love for the game and support
+                Our club values excellence, sportsmanship, and camaraderie. We're more than just a 
+                cricket team—we're a community of players who share a love for the game and support 
                 each other both on and off the field.
               </p>
             </div>
@@ -216,6 +225,7 @@ export default function JoinUs() {
                     value={formData.name}
                     onChange={handleInputChange}
                     className="bg-card border-border"
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -233,6 +243,7 @@ export default function JoinUs() {
                       value={formData.email}
                       onChange={handleInputChange}
                       className="bg-card border-border"
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div>
@@ -247,6 +258,7 @@ export default function JoinUs() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       className="bg-card border-border"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -257,7 +269,7 @@ export default function JoinUs() {
                     <label htmlFor="role" className="block text-sm font-heading font-medium text-foreground mb-2">
                       Playing Role *
                     </label>
-                    <Select value={formData.role} onValueChange={(value) => handleSelectChange("role", value)}>
+                    <Select value={formData.role} onValueChange={(value) => handleSelectChange("role", value)} disabled={isSubmitting}>
                       <SelectTrigger className="bg-card border-border">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
@@ -274,14 +286,15 @@ export default function JoinUs() {
                     <label htmlFor="experience" className="block text-sm font-heading font-medium text-foreground mb-2">
                       Experience Level *
                     </label>
-                    <Select value={formData.experience} onValueChange={(value) => handleSelectChange("experience", value)}>
+                    <Select value={formData.experience} onValueChange={(value) => handleSelectChange("experience", value)} disabled={isSubmitting}>
                       <SelectTrigger className="bg-card border-border">
-                        <SelectValue placeholder="Select experience level" />
+                        <SelectValue placeholder="Select your level" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="beginner">Beginner</SelectItem>
                         <SelectItem value="intermediate">Intermediate</SelectItem>
                         <SelectItem value="advanced">Advanced</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -295,69 +308,24 @@ export default function JoinUs() {
                   <Textarea
                     id="message"
                     name="message"
-                    placeholder="Share your cricket experience, why you want to join, and any other relevant information..."
-                    rows={5}
+                    placeholder="Share your cricket experience, goals, and why you'd like to join Blackstone CC..."
                     value={formData.message}
                     onChange={handleInputChange}
-                    className="bg-card border-border resize-none"
+                    className="bg-card border-border min-h-32"
+                    disabled={isSubmitting}
                   />
                 </div>
 
+                {/* Submit Button */}
                 <Button
                   type="submit"
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading font-semibold py-3"
                   disabled={isSubmitting}
-                  size="lg"
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  * Required fields
-                </p>
               </form>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* How to Join */}
-      <section className="py-16">
-        <div className="container">
-          <h2 className="font-display font-bold text-4xl text-foreground mb-12 text-center">
-            The Process
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
-                1
-              </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Apply</h3>
-              <p className="text-muted-foreground">
-                Fill out the registration form above with your details and experience level.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
-                2
-              </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Trial</h3>
-              <p className="text-muted-foreground">
-                We'll invite you to a practice session to meet the team and showcase your skills.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent text-accent-foreground font-display font-bold text-2xl mb-4">
-                3
-              </div>
-              <h3 className="font-heading font-semibold text-xl text-foreground mb-3">Join</h3>
-              <p className="text-muted-foreground">
-                Complete registration and become an official member of Blackstone CC.
-              </p>
-            </div>
           </div>
         </div>
       </section>

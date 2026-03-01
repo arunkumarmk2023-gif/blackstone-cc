@@ -3,9 +3,9 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoinRequest, getJoinRequests, getJoinRequestById, updateJoinRequestStatus, deleteJoinRequest } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoinRequest } from "../drizzle/schema";
-import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText, generateJoinConfirmationEmail, generateJoinConfirmationEmailText } from "./email";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoiner, getJoiners, getJoinerById, getJoinersByStatus, updateJoinerStatus, deleteJoiner } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoiner } from "../drizzle/schema";
+import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
 import { storagePut } from "./storage";
 
 export const appRouter = router({
@@ -57,7 +57,7 @@ export const appRouter = router({
       }),
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can update fixtures");
-      return updateFixture(input.id, input.data);
+      return updateFixture(input.id, input.data as Partial<InsertFixture>);
     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete fixtures");
@@ -70,17 +70,17 @@ export const appRouter = router({
     getById: publicProcedure.input(z.object({ id: z.number() })).query(({ input }) => getPlayerById(input.id)),
     create: protectedProcedure.input(z.object({
       name: z.string(),
-      role: z.enum(["Batsman", "Bowler", "All-Rounder", "Wicketkeeper"]),
+      role: z.string(),
       battingStyle: z.string().optional(),
       bowlingStyle: z.string().optional(),
       jerseyNumber: z.number().optional(),
-      photoUrl: z.string().optional(),
       bio: z.string().optional(),
-      isCaptain: z.number().optional(),
-      isImpactPlayer: z.number().optional(),
-      runsScored: z.number().optional(),
-      wicketsTaken: z.number().optional(),
-      matchesPlayed: z.number().optional(),
+      photoUrl: z.string().optional(),
+      joinedYear: z.number().optional(),
+      matches: z.number().optional(),
+      runs: z.number().optional(),
+      wickets: z.number().optional(),
+      stats: z.string().optional(),
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can create players");
       return createPlayer(input as InsertPlayer);
@@ -89,21 +89,21 @@ export const appRouter = router({
       id: z.number(),
       data: z.object({
         name: z.string().optional(),
-        role: z.enum(["Batsman", "Bowler", "All-Rounder", "Wicketkeeper"]).optional(),
+        role: z.string().optional(),
         battingStyle: z.string().optional(),
         bowlingStyle: z.string().optional(),
         jerseyNumber: z.number().optional(),
-        photoUrl: z.string().optional(),
         bio: z.string().optional(),
-        isCaptain: z.number().optional(),
-        isImpactPlayer: z.number().optional(),
-        runsScored: z.number().optional(),
-        wicketsTaken: z.number().optional(),
-        matchesPlayed: z.number().optional(),
+        photoUrl: z.string().optional(),
+        joinedYear: z.number().optional(),
+        matches: z.number().optional(),
+        runs: z.number().optional(),
+        wickets: z.number().optional(),
+        stats: z.string().optional(),
       }),
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can update players");
-      return updatePlayer(input.id, input.data);
+      return updatePlayer(input.id, input.data as Partial<InsertPlayer>);
     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete players");
@@ -116,13 +116,10 @@ export const appRouter = router({
     getById: publicProcedure.input(z.object({ id: z.number() })).query(({ input }) => getNewsById(input.id)),
     create: protectedProcedure.input(z.object({
       title: z.string(),
-      category: z.enum(["Match Report", "Announcement", "Selection", "Event", "Other"]).optional(),
-      summary: z.string(),
       content: z.string(),
-      imageUrl: z.string().optional(),
       author: z.string().optional(),
-      published: z.number().optional(),
-      publishedAt: z.date().optional(),
+      featured: z.boolean().optional(),
+      imageUrl: z.string().optional(),
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can create news");
       return createNews(input as InsertNews);
@@ -131,17 +128,14 @@ export const appRouter = router({
       id: z.number(),
       data: z.object({
         title: z.string().optional(),
-        category: z.enum(["Match Report", "Announcement", "Selection", "Event", "Other"]).optional(),
-        summary: z.string().optional(),
         content: z.string().optional(),
-        imageUrl: z.string().optional(),
         author: z.string().optional(),
-        published: z.number().optional(),
-        publishedAt: z.date().optional(),
+        featured: z.boolean().optional(),
+        imageUrl: z.string().optional(),
       }),
     })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can update news");
-      return updateNews(input.id, input.data);
+      return updateNews(input.id, input.data as Partial<InsertNews>);
     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete news");
@@ -150,18 +144,19 @@ export const appRouter = router({
   }),
 
   notifications: router({
-    list: publicProcedure.query(() => getNotifications()),
+    list: protectedProcedure.query(({ ctx }) => getNotifications(ctx.user?.id || 0)),
     create: protectedProcedure.input(z.object({
       title: z.string(),
       message: z.string(),
-      type: z.enum(["info", "success", "warning", "error", "match_alert", "announcement"]).optional(),
-      icon: z.string().optional(),
-      isGlobal: z.number().optional(),
-      actionUrl: z.string().optional(),
-      actionLabel: z.string().optional(),
+      type: z.enum(["info", "success", "warning", "error"]).optional(),
     })).mutation(({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can create notifications");
-      return createNotification(input as InsertNotification);
+      return createNotification({
+        userId: ctx.user?.id || 0,
+        title: input.title,
+        message: input.message,
+        type: input.type || "info",
+        read: 0,
+      } as InsertNotification);
     }),
     markAsRead: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => {
       return markNotificationAsRead(input.id);
@@ -169,81 +164,48 @@ export const appRouter = router({
   }),
 
   newsletter: router({
-    subscribe: publicProcedure.input(z.object({
-      email: z.string().email(),
-      name: z.string().optional(),
-    })).mutation(async ({ input }) => {
-      const existing = await getSubscriberByEmail(input.email);
-      if (existing && existing.subscribed) {
-        throw new Error("Email already subscribed");
-      }
-      return await subscribeNewsletter({
-        email: input.email,
-        name: input.name,
-        subscribed: 1,
-        verified: 1,
-      } as InsertNewsletterSubscriber);
+    subscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => {
+      return subscribeNewsletter(input.email);
+    }),
+    unsubscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => {
+      return unsubscribeNewsletter(input.email);
     }),
     list: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can view subscribers");
       return await getNewsletterSubscribers();
     }),
-    unsubscribe: publicProcedure.input(z.object({
-      email: z.string().email(),
-    })).mutation(({ input }) => {
-      return unsubscribeNewsletter(input.email);
-    }),
-    delete: protectedProcedure.input(z.object({
-      id: z.number(),
-    })).mutation(({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete subscribers");
-      return deleteNewsletterSubscriber(input.id);
-    }),
   }),
 
   contact: router({
     submit: publicProcedure.input(z.object({
-      name: z.string().min(1, "Name is required"),
-      email: z.string().email("Valid email is required"),
+      name: z.string().min(1),
+      email: z.string().email(),
       phone: z.string().optional(),
-      subject: z.string().min(1, "Subject is required"),
-      message: z.string().min(1, "Message is required"),
+      subject: z.string().optional(),
+      message: z.string().min(10),
     })).mutation(async ({ input }) => {
       try {
-        // Save to database
         const submission: InsertContactSubmission = {
           name: input.name,
           email: input.email,
           phone: input.phone || null,
-          subject: input.subject,
+          subject: input.subject || null,
           message: input.message,
           status: "new",
         };
         await createContactSubmission(submission);
-
-        // Send confirmation email
-        const htmlContent = generateContactConfirmationEmail(input);
-        const textContent = generateContactConfirmationEmailText(input);
-
-        const emailSent = await sendEmail({
+        const confirmationHtml = generateContactConfirmationEmail({ name: input.name, email: input.email, subject: input.subject || 'General Inquiry', message: input.message });
+        const confirmationText = generateContactConfirmationEmailText({ name: input.name, email: input.email, subject: input.subject || 'General Inquiry', message: input.message });
+        await sendEmail({
           to: input.email,
-          subject: "We received your message - Blackstone Cricket Club",
-          html: htmlContent,
-          text: textContent,
+          subject: "We received your message - Blackstone CC",
+          html: confirmationHtml,
+          text: confirmationText,
         });
-
-        if (!emailSent) {
-          console.warn("Confirmation email failed to send, but contact form was submitted and saved");
-        }
-
-        return {
-          success: true,
-          message: "Your message has been received and saved. Check your email for confirmation.",
-          emailSent,
-        };
+        return { success: true, message: "Thank you for contacting us!" };
       } catch (error) {
-        console.error("Error processing contact form:", error);
-        throw new Error("Failed to process your message. Please try again.");
+        console.error("Contact submission error:", error);
+        throw new Error("Failed to submit contact form");
       }
     }),
     list: protectedProcedure.query(async ({ ctx }) => {
@@ -251,22 +213,19 @@ export const appRouter = router({
       return await getContactSubmissions();
     }),
     getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can view contact submissions");
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view contact details");
       return await getContactSubmissionById(input.id);
     }),
-    updateStatus: protectedProcedure.input(z.object({
-      id: z.number(),
-      status: z.enum(["new", "read", "responded", "archived"]),
-      notes: z.string().optional(),
-    })).mutation(async ({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can update contact submissions");
-      return await updateContactSubmissionStatus(input.id, input.status, input.notes, ctx.user.id);
+    updateStatus: protectedProcedure.input(z.object({ id: z.number(), status: z.enum(["new", "read", "responded", "archived"]) })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update contact status");
+      return await updateContactSubmissionStatus(input.id, input.status);
     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete contact submissions");
       return await deleteContactSubmission(input.id);
     }),
   }),
+
   gallery: router({
     list: publicProcedure.query(async () => {
       return await getGalleryImages();
@@ -275,7 +234,7 @@ export const appRouter = router({
       return await getFeaturedGalleryImages(input.limit || 6);
     }),
     upload: protectedProcedure.input(z.object({
-      title: z.string().min(1, "Title is required"),
+      title: z.string().min(1),
       description: z.string().optional(),
       category: z.enum(["Match", "Training", "Event", "Team Photo", "Other"]),
       featured: z.boolean().optional(),
@@ -313,18 +272,17 @@ export const appRouter = router({
     }),
   }),
 
-  joinClub: router({
+  joiners: router({
     submit: publicProcedure.input(z.object({
-      name: z.string().min(1, "Name is required"),
-      email: z.string().email("Valid email is required"),
+      name: z.string().min(1),
+      email: z.string().email(),
       phone: z.string().optional(),
-      role: z.string().min(1, "Playing role is required"),
-      experience: z.string().min(1, "Experience level is required"),
-      message: z.string().min(1, "Message is required"),
+      role: z.enum(["batsman", "bowler", "allrounder", "wicketkeeper", "supporter"]),
+      experience: z.enum(["beginner", "intermediate", "advanced", "professional"]),
+      message: z.string().min(10),
     })).mutation(async ({ input }) => {
       try {
-        // Save to database
-        const joinRequest: InsertJoinRequest = {
+        const joiner: InsertJoiner = {
           name: input.name,
           email: input.email,
           phone: input.phone || null,
@@ -333,48 +291,28 @@ export const appRouter = router({
           message: input.message,
           status: "new",
         };
-        await createJoinRequest(joinRequest);
-
-        // Send confirmation email
-        const htmlContent = generateJoinConfirmationEmail(input);
-        const textContent = generateJoinConfirmationEmailText(input);
-
-        const emailSent = await sendEmail({
-          to: input.email,
-          subject: "Application Received - Blackstone Cricket Club",
-          html: htmlContent,
-          text: textContent,
-        });
-
-        if (!emailSent) {
-          console.warn("Confirmation email failed to send, but join request was saved");
-        }
-
-        return {
-          success: true,
-          message: "Your application has been received! We'll be in touch about trials and training.",
-          emailSent,
-        };
+        await createJoiner(joiner);
+        return { success: true, message: "Thank you! We will contact you soon about trials and training." };
       } catch (error) {
-        console.error("Error processing join request:", error);
-        throw new Error("Failed to process your application. Please try again.");
+        console.error("Joiner submission error:", error);
+        throw new Error("Failed to submit joiner application");
       }
     }),
     list: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can view join requests");
-      return await getJoinRequests();
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view joiner applications");
+      return await getJoiners();
     }),
-    updateStatus: protectedProcedure.input(z.object({
-      id: z.number(),
-      status: z.enum(["new", "contacted", "accepted", "rejected"]),
-      notes: z.string().optional(),
-    })).mutation(async ({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can update join requests");
-      return await updateJoinRequestStatus(input.id, input.status, input.notes);
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view joiner details");
+      return await getJoinerById(input.id);
+    }),
+    updateStatus: protectedProcedure.input(z.object({ id: z.number(), status: z.enum(["new", "reviewed", "accepted", "rejected", "archived"]) })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update joiner status");
+      return await updateJoinerStatus(input.id, input.status);
     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete join requests");
-      return await deleteJoinRequest(input.id);
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete joiner records");
+      return await deleteJoiner(input.id);
     }),
   }),
 });
