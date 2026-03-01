@@ -78,3 +78,9 @@
 - [x] Add joiner management view to admin dashboard
 - [x] Write and run tests for joiner functionality (8 tests passing)
 - [x] Test end-to-end and save checkpoint
+
+## Navigation Menu Fixes
+
+- [x] Fix Contact menu visibility on desktop
+- [x] Verify Contact menu shows on both mobile and desktop
+- [x] Save checkpoint with navigation fix

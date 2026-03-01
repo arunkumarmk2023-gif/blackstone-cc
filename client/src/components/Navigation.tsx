@@ -39,12 +39,12 @@ export default function Navigation() {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 flex-wrap justify-center flex-1 mx-4">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 rounded-lg font-heading text-sm transition-all ${location === link.href
+                className={`px-3 py-2 rounded-lg font-heading text-xs lg:text-sm transition-all whitespace-nowrap ${location === link.href
                     ? "bg-accent text-accent-foreground font-semibold"
                     : "text-foreground hover:bg-secondary hover:text-accent"
                   }`}
