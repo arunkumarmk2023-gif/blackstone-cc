@@ -358,12 +358,12 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-foreground">Join Requests</h2>
                 </div>
 
-                {joinRequestsQuery.isLoading ? (
+                {joinersQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="animate-spin" />
-                    <span>Loading join requests...</span>
+                    <span>Loading join applications...</span>
                   </div>
-                ) : joinRequestsQuery.data && joinRequestsQuery.data.length > 0 ? (
+                ) : joinersQuery.data && joinersQuery.data.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -378,7 +378,7 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {joinRequestsQuery.data.map((request: any) => (
+                        {joinersQuery.data.map((request: any) => (
                           <tr key={request.id} className="border-b border-border hover:bg-card/50">
                             <td className="py-3 px-4">{new Date(request.createdAt).toLocaleDateString()}</td>
                             <td className="py-3 px-4">{request.name}</td>
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="py-3 px-4">
                               <button
-                                onClick={() => deleteJoinRequest.mutate({ id: request.id }, { onSuccess: () => joinRequestsQuery.refetch() })}
+                                onClick={() => deleteJoiner.mutate({ id: request.id }, { onSuccess: () => joinersQuery.refetch() })}
                                 className="text-destructive hover:text-destructive/90"
                               >
                                 <Trash2 className="w-4 h-4" />
