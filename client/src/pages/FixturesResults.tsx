@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ExternalLink } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 
 export default function FixturesResults() {
   const [activeTab, setActiveTab] = useState<"fixtures" | "results">("fixtures");
@@ -175,6 +176,7 @@ export default function FixturesResults() {
                       <th className="text-left py-3 px-4 font-heading font-semibold">Score</th>
                       <th className="text-left py-3 px-4 font-heading font-semibold">Result</th>
                       <th className="text-left py-3 px-4 font-heading font-semibold">Scorecard</th>
+                      <th className="text-left py-3 px-4 font-heading font-semibold">Share</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -221,6 +223,12 @@ export default function FixturesResults() {
                           ) : (
                             <span className="text-muted-foreground">—</span>
                           )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <ShareButtons
+                            title={`${result.opponentName} vs Blackstone CC - ${result.result.toUpperCase()}`}
+                            text={`Check out the match result: Blackstone CC vs ${result.opponentName}. Score: ${result.score}. Result: ${result.result.toUpperCase()}. #BlackstoneCC #Cricket`}
+                          />
                         </td>
                       </tr>
                     ))}
