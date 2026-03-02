@@ -2,8 +2,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoiner, getJoiners, getJoinerById, getJoinersByStatus, updateJoinerStatus, deleteJoiner } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoiner } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoiner, getJoiners, getJoinerById, getJoinersByStatus, updateJoinerStatus, deleteJoiner, createResult, getResults, getResultById, updateResult, deleteResult } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoiner, InsertResult } from "../drizzle/schema";
 import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
 import { storagePut } from "./storage";
 
@@ -316,6 +316,46 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete joiner records");
       return await deleteJoiner(input.id);
+    }),
+  }),
+
+  results: router({
+    list: publicProcedure.query(async () => {
+      return await getResults();
+    }),
+    getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getResultById(input.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      date: z.date(),
+      venue: z.string().min(1),
+      league: z.string().min(1),
+      opponentName: z.string().min(1),
+      score: z.string().min(1),
+      result: z.enum(["win", "loss", "tie", "no_result"]),
+      scorecardUrl: z.string().url().optional(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can create results");
+      return await createResult(input as InsertResult);
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      data: z.object({
+        date: z.date().optional(),
+        venue: z.string().optional(),
+        league: z.string().optional(),
+        opponentName: z.string().optional(),
+        score: z.string().optional(),
+        result: z.enum(["win", "loss", "tie", "no_result"]).optional(),
+        scorecardUrl: z.string().url().optional(),
+      }),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update results");
+      return await updateResult(input.id, input.data as Partial<InsertResult>);
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete results");
+      return await deleteResult(input.id);
     }),
   }),
 });

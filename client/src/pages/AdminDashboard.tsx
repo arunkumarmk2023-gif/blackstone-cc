@@ -9,6 +9,7 @@ import { Loader2, Plus, Edit, Trash2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SimpleFixtureForm from "@/components/SimpleFixtureForm";
+import SimpleResultForm from "@/components/SimpleResultForm";
 import SimplePlayerForm from "@/components/SimplePlayerForm";
 import SimpleNewsForm from "@/components/SimpleNewsForm";
 import { toast } from "sonner";
@@ -18,11 +19,13 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("fixtures");
   const [showFixtureForm, setShowFixtureForm] = useState(false);
+  const [showResultForm, setShowResultForm] = useState(false);
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [showGalleryUpload, setShowGalleryUpload] = useState(false);
 
   const fixturesQuery = trpc.fixtures.list.useQuery();
+  const resultsQuery = trpc.results.list.useQuery();
   const playersQuery = trpc.players.list.useQuery();
   const newsQuery = trpc.news.list.useQuery();
   const newsletterQuery = trpc.newsletter.list.useQuery();
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
   const deleteNews = trpc.news.delete.useMutation();
   const deleteJoiner = trpc.joiners.delete.useMutation();
   const deleteGallery = trpc.gallery.delete.useMutation();
+  const deleteResult = trpc.results.delete.useMutation();
   const uploadGallery = trpc.gallery.upload.useMutation();
 
   // Gallery upload form state
@@ -82,8 +86,9 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-8">
+              <TabsList className="grid w-full grid-cols-9">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
+                <TabsTrigger value="results">Results</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -149,6 +154,82 @@ export default function AdminDashboard() {
                 ) : (
                   <Card className="p-8 text-center">
                     <p className="text-muted-foreground">No fixtures yet.</p>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Results Tab */}
+              <TabsContent value="results" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-foreground">Match Results</h2>
+                  <button
+                    onClick={() => setShowResultForm(!showResultForm)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-foreground font-heading cursor-pointer transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Result
+                  </button>
+                </div>
+
+                {showResultForm && <SimpleResultForm onSuccess={() => { setShowResultForm(false); resultsQuery.refetch(); }} />}
+
+                {resultsQuery.isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" />
+                    <span>Loading results...</span>
+                  </div>
+                ) : resultsQuery.data && resultsQuery.data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Opponent</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Venue</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">League</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Score</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Result</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {resultsQuery.data.map((result: any) => (
+                          <tr key={result.id} className="border-b border-border hover:bg-card/50">
+                            <td className="py-3 px-4">{new Date(result.date).toLocaleDateString()}</td>
+                            <td className="py-3 px-4">{result.opponentName}</td>
+                            <td className="py-3 px-4">{result.venue}</td>
+                            <td className="py-3 px-4">{result.league}</td>
+                            <td className="py-3 px-4 font-mono text-sm">{result.score}</td>
+                            <td className="py-3 px-4">
+                              <Badge
+                                variant={result.result === "win" ? "default" : "outline"}
+                                className={
+                                  result.result === "win"
+                                    ? "bg-green-600/20 text-green-400 border-green-600/30"
+                                    : result.result === "loss"
+                                    ? "bg-red-600/20 text-red-400 border-red-600/30"
+                                    : "bg-yellow-600/20 text-yellow-400 border-yellow-600/30"
+                                }
+                              >
+                                {result.result.charAt(0).toUpperCase() + result.result.slice(1).replace("_", " ")}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <button
+                                onClick={() => deleteResult.mutate({ id: result.id })}
+                                className="text-destructive hover:text-destructive/90"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No results yet.</p>
                   </Card>
                 )}
               </TabsContent>

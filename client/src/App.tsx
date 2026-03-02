@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Fixtures from "./pages/Fixtures";
+import FixturesResults from "./pages/FixturesResults";
 import Players from "./pages/Players";
 import News from "./pages/News";
 import Gallery from "./pages/Gallery";
@@ -18,7 +19,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/fixtures"} component={Fixtures} />
+      <Route path={"/fixtures"} component={FixturesResults} />
       <Route path={"/players"} component={Players} />
       <Route path={"/news"} component={News} />
       <Route path={"/gallery"} component={Gallery} />

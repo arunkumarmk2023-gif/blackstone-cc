@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery, joiners, InsertJoiner } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery, joiners, InsertJoiner, results, InsertResult } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -357,4 +357,37 @@ export async function deleteJoiner(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(joiners).where(eq(joiners.id, id));
+}
+
+
+// Results CRUD operations
+export async function createResult(result: InsertResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(results).values(result);
+}
+
+export async function getResults() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(results).orderBy(desc(results.date));
+}
+
+export async function getResultById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(results).where(eq(results.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateResult(id: number, data: Partial<InsertResult>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(results).set(data).where(eq(results.id, id));
+}
+
+export async function deleteResult(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(results).where(eq(results.id, id));
 }

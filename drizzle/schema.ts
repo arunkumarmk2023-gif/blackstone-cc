@@ -194,3 +194,22 @@ export const joiners = mysqlTable("joiners", {
 
 export type Joiner = typeof joiners.$inferSelect;
 export type InsertJoiner = typeof joiners.$inferInsert;
+
+/**
+ * Results table for storing completed match results
+ */
+export const results = mysqlTable("results", {
+  id: int("id").autoincrement().primaryKey(),
+  date: timestamp("date").notNull(),
+  venue: varchar("venue", { length: 255 }).notNull(),
+  league: varchar("league", { length: 255 }).notNull(),
+  opponentName: varchar("opponentName", { length: 255 }).notNull(),
+  score: varchar("score", { length: 255 }).notNull(), // e.g., "Blackstone CC 145/6 (20) vs Opponent 132/9 (20)"
+  result: mysqlEnum("result", ["win", "loss", "tie", "no_result"]).notNull(),
+  scorecardUrl: text("scorecardUrl"), // CricClubs or other scorecard link
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Result = typeof results.$inferSelect;
+export type InsertResult = typeof results.$inferInsert;

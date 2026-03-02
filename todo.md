@@ -92,3 +92,14 @@
 - [x] Fix image delete functionality
 - [x] Test upload and delete operations
 - [x] Save checkpoint with gallery fixes
+
+## Fixtures & Results System
+
+- [ ] Design database schema for fixtures and results tables
+- [ ] Create database helper functions for CRUD operations
+- [ ] Add tRPC procedures for fixtures and results
+- [ ] Create public Fixtures & Results page with responsive tabs
+- [ ] Build admin interface for managing fixtures and results
+- [ ] Integrate into admin dashboard
+- [ ] Write and run tests
+- [ ] Test end-to-end and save checkpoint
