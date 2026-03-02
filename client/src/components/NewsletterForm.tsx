@@ -25,10 +25,10 @@ export default function NewsletterForm({ className = "", variant = "default" }: 
     }
 
     try {
-      await subscribeMutation.mutateAsync({ email, name: name || undefined });
+      await subscribeMutation.mutateAsync({ email });
       toast.success("Successfully subscribed to our newsletter!");
       setEmail("");
-      setName("");
+      setName(""); // Keep name state for UI but don't send to backend
     } catch (error: any) {
       if (error.message.includes("already subscribed")) {
         toast.error("This email is already subscribed");

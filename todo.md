@@ -84,3 +84,11 @@
 - [x] Fix Contact menu visibility on desktop
 - [x] Verify Contact menu shows on both mobile and desktop
 - [x] Save checkpoint with navigation fix
+
+## Gallery Upload and Delete Fixes
+
+- [x] Review gallery tab in admin dashboard
+- [x] Fix image upload functionality
+- [x] Fix image delete functionality
+- [x] Test upload and delete operations
+- [x] Save checkpoint with gallery fixes

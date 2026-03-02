@@ -1,4 +1,3 @@
-import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -14,7 +13,7 @@ export const appRouter = router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie("session", { ...cookieOptions, maxAge: -1 });
       return {
         success: true,
       } as const;
@@ -164,10 +163,14 @@ export const appRouter = router({
   }),
 
   newsletter: router({
-    subscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => {
-      return subscribeNewsletter(input.email);
+    subscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(async ({ input }) => {
+      const subscriber: InsertNewsletterSubscriber = {
+        email: input.email,
+        subscribed: 1,
+      };
+      return subscribeNewsletter(subscriber);
     }),
-    unsubscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => {
+    unsubscribe: publicProcedure.input(z.object({ email: z.string().email() })).mutation(async ({ input }) => {
       return unsubscribeNewsletter(input.email);
     }),
     list: protectedProcedure.query(async ({ ctx }) => {
@@ -185,15 +188,15 @@ export const appRouter = router({
       message: z.string().min(10),
     })).mutation(async ({ input }) => {
       try {
-        const submission: InsertContactSubmission = {
+        const submission = {
           name: input.name,
           email: input.email,
           phone: input.phone || null,
           subject: input.subject || null,
           message: input.message,
-          status: "new",
+          status: "new" as const,
         };
-        await createContactSubmission(submission);
+        await createContactSubmission(submission as InsertContactSubmission);
         const confirmationHtml = generateContactConfirmationEmail({ name: input.name, email: input.email, subject: input.subject || 'General Inquiry', message: input.message });
         const confirmationText = generateContactConfirmationEmailText({ name: input.name, email: input.email, subject: input.subject || 'General Inquiry', message: input.message });
         await sendEmail({
