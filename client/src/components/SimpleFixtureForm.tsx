@@ -13,13 +13,11 @@ interface SimpleFixtureFormProps {
 
 export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureFormProps) {
   const [opponent, setOpponent] = useState(fixture?.opponent || "");
-  const [venue, setVenue] = useState(fixture?.venue || "Connecticut Cricket League");
+  const [venue, setVenue] = useState(fixture?.venue || "");
   const [date, setDate] = useState(fixture?.date ? new Date(fixture.date).toISOString().split("T")[0] : "");
+  const [time, setTime] = useState(fixture?.date ? new Date(fixture.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }) : "");
   const [format, setFormat] = useState(fixture?.format || "Hard Tennis Ball");
   const [status, setStatus] = useState<"upcoming" | "live" | "completed" | "cancelled">(fixture?.status || "upcoming");
-  const [ourScore, setOurScore] = useState(fixture?.ourScore || "");
-  const [theirScore, setTheirScore] = useState(fixture?.theirScore || "");
-  const [result, setResult] = useState(fixture?.result || "");
 
   const createFixture = trpc.fixtures.create.useMutation();
   const updateFixture = trpc.fixtures.update.useMutation();
@@ -27,21 +25,28 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!opponent || !date) {
-      toast.error("Opponent and date are required");
+    if (!opponent || !date || !time) {
+      toast.error("Opponent, date, and time are required");
       return;
     }
 
     try {
+      // Combine date and time, then convert to UTC
+      const [hours, minutes] = time.split(":").map(Number);
+      const estDate = new Date(date);
+      estDate.setHours(hours, minutes, 0, 0);
+      
+      // Convert EST to UTC (EST is UTC-5, EDT is UTC-4)
+      // For simplicity, we'll store the date as-is and handle timezone in display
       const payload = {
         opponent,
         venue,
-        date: new Date(date),
+        date: estDate,
         format,
         status: status as "upcoming" | "live" | "completed" | "cancelled",
-        ourScore,
-        theirScore,
-        result,
+        ourScore: "",
+        theirScore: "",
+        result: "",
         notes: "",
       };
 
@@ -55,13 +60,11 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
         await createFixture.mutateAsync(payload);
         toast.success("Fixture created");
         setOpponent("");
-        setVenue("Connecticut Cricket League");
+        setVenue("");
         setDate("");
+        setTime("");
         setFormat("Hard Tennis Ball");
         setStatus("upcoming");
-        setOurScore("");
-        setTheirScore("");
-        setResult("");
       }
       onSuccess();
     } catch (error) {
@@ -71,8 +74,9 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-card border border-border rounded-lg">
-      <div className="grid grid-cols-2 gap-3">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card border border-border rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Opponent */}
         <div>
           <Label htmlFor="opponent" className="text-sm">Opponent *</Label>
           <Input
@@ -84,8 +88,21 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
           />
         </div>
 
+        {/* Venue */}
         <div>
-          <Label htmlFor="date" className="text-sm">Date *</Label>
+          <Label htmlFor="venue" className="text-sm">Venue *</Label>
+          <Input
+            id="venue"
+            value={venue}
+            onChange={(e) => setVenue(e.target.value)}
+            placeholder="Venue name"
+            required
+          />
+        </div>
+
+        {/* Date */}
+        <div>
+          <Label htmlFor="date" className="text-sm">Date (EST) *</Label>
           <Input
             id="date"
             type="date"
@@ -95,22 +112,27 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
           />
         </div>
 
+        {/* Time */}
         <div>
-          <Label htmlFor="venue" className="text-sm">Venue</Label>
+          <Label htmlFor="time" className="text-sm">Time (EST) *</Label>
           <Input
-            id="venue"
-            value={venue}
-            onChange={(e) => setVenue(e.target.value)}
+            id="time"
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            required
           />
         </div>
 
+        {/* Format */}
         <div>
-          <Label htmlFor="format" className="text-sm">Format</Label>
+          <Label htmlFor="format" className="text-sm">Format *</Label>
           <select
             id="format"
             value={format}
             onChange={(e) => setFormat(e.target.value)}
-            className="w-full px-2 py-1 border border-border rounded text-sm"
+            className="w-full px-3 py-2 border border-border rounded text-sm bg-background"
+            required
           >
             <option>Hard Tennis Ball</option>
             <option>T20</option>
@@ -119,49 +141,21 @@ export default function SimpleFixtureForm({ fixture, onSuccess }: SimpleFixtureF
           </select>
         </div>
 
+        {/* Status */}
         <div>
-          <Label htmlFor="status" className="text-sm">Status</Label>
+          <Label htmlFor="status" className="text-sm">Status *</Label>
           <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as "upcoming" | "live" | "completed" | "cancelled")}
-            className="w-full px-2 py-1 border border-border rounded text-sm"
+            className="w-full px-3 py-2 border border-border rounded text-sm bg-background"
+            required
           >
             <option value="upcoming">Upcoming</option>
             <option value="live">Live</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-        </div>
-
-        <div>
-          <Label htmlFor="result" className="text-sm">Result</Label>
-          <Input
-            id="result"
-            value={result}
-            onChange={(e) => setResult(e.target.value)}
-            placeholder="Win/Loss"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="ourScore" className="text-sm">Our Score</Label>
-          <Input
-            id="ourScore"
-            value={ourScore}
-            onChange={(e) => setOurScore(e.target.value)}
-            placeholder="150"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="theirScore" className="text-sm">Their Score</Label>
-          <Input
-            id="theirScore"
-            value={theirScore}
-            onChange={(e) => setTheirScore(e.target.value)}
-            placeholder="140"
-          />
         </div>
       </div>
 

@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("fixtures");
   const [showFixtureForm, setShowFixtureForm] = useState(false);
+  const [editingFixture, setEditingFixture] = useState<any>(null);
   const [showResultForm, setShowResultForm] = useState(false);
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showNewsForm, setShowNewsForm] = useState(false);
@@ -161,7 +162,16 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                {showFixtureForm && <SimpleFixtureForm onSuccess={() => { setShowFixtureForm(false); fixturesQuery.refetch(); }} />}
+                {showFixtureForm && (
+                  <SimpleFixtureForm
+                    fixture={editingFixture}
+                    onSuccess={() => {
+                      setShowFixtureForm(false);
+                      setEditingFixture(null);
+                      fixturesQuery.refetch();
+                    }}
+                  />
+                )}
 
                 {fixturesQuery.isLoading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -173,30 +183,62 @@ export default function AdminDashboard() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-border">
-                          <th className="text-left py-3 px-4 font-heading font-semibold">Date</th>
-                          <th className="text-left py-3 px-4 font-heading font-semibold">Team 1</th>
-                          <th className="text-left py-3 px-4 font-heading font-semibold">Team 2</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Opponent</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Date/Time (EST)</th>
                           <th className="text-left py-3 px-4 font-heading font-semibold">Venue</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Format</th>
+                          <th className="text-left py-3 px-4 font-heading font-semibold">Status</th>
                           <th className="text-left py-3 px-4 font-heading font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {fixturesQuery.data.map((fixture: any) => (
-                          <tr key={fixture.id} className="border-b border-border hover:bg-card/50">
-                            <td className="py-3 px-4">{new Date(fixture.fixtureDate).toLocaleDateString()}</td>
-                            <td className="py-3 px-4">{fixture.team1}</td>
-                            <td className="py-3 px-4">{fixture.team2}</td>
-                            <td className="py-3 px-4">{fixture.venue}</td>
-                            <td className="py-3 px-4">
-                              <button
-                                onClick={() => deleteFixture.mutate({ id: fixture.id })}
-                                className="text-destructive hover:text-destructive/90"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {fixturesQuery.data.map((fixture: any) => {
+                          const fixtureDate = new Date(fixture.date);
+                          const estTime = fixtureDate.toLocaleString("en-US", {
+                            timeZone: "America/New_York",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          });
+                          return (
+                            <tr key={fixture.id} className="border-b border-border hover:bg-card/50">
+                              <td className="py-3 px-4">{fixture.opponent}</td>
+                              <td className="py-3 px-4">{estTime}</td>
+                              <td className="py-3 px-4">{fixture.venue}</td>
+                              <td className="py-3 px-4">{fixture.format}</td>
+                              <td className="py-3 px-4">
+                                <Badge
+                                  variant={fixture.status === "upcoming" ? "outline" : fixture.status === "live" ? "default" : "secondary"}
+                                  className={fixture.status === "live" ? "bg-red-600/20 text-red-400 border-red-600/30" : ""}
+                                >
+                                  {fixture.status.charAt(0).toUpperCase() + fixture.status.slice(1)}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-4 flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingFixture(fixture);
+                                    setShowFixtureForm(true);
+                                  }}
+                                  className="text-accent hover:text-accent/90"
+                                  title="Edit fixture"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteFixture.mutate({ id: fixture.id })}
+                                  className="text-destructive hover:text-destructive/90"
+                                  title="Delete fixture"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
