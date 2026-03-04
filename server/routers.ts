@@ -108,6 +108,16 @@ export const appRouter = router({
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete players");
       return deletePlayer(input.id);
     }),
+    uploadPhoto: protectedProcedure.input(z.object({
+      fileName: z.string(),
+      fileData: z.string(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can upload photos");
+      const { storagePut } = await import("../server/storage");
+      const buffer = Buffer.from(input.fileData, "base64");
+      const result = await storagePut(`players/${Date.now()}-${input.fileName}`, buffer, "image/jpeg");
+      return result;
+    }),
   }),
 
   news: router({

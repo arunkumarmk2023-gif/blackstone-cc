@@ -80,19 +80,7 @@ export default function Players() {
                       )}
                     </div>
                     
-                    {/* Badges */}
-                    <div className="absolute top-2 right-2 flex gap-2">
-                      {player.isCaptain === 1 && (
-                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-lg" title="Captain">
-                          <Crown className="w-4 h-4 text-accent-foreground" />
-                        </div>
-                      )}
-                      {player.isImpactPlayer === 1 && (
-                        <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center shadow-lg" title="Impact Player">
-                          <Zap className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
+
                   </div>
 
                   {/* Player Info */}
@@ -104,9 +92,13 @@ export default function Players() {
                     <p className="text-sm text-muted-foreground mb-2">Jersey #{player.jerseyNumber}</p>
                   )}
                   
-                  <Badge variant="secondary" className="mb-4 font-heading">
-                    {player.role}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {player.role && player.role.split(",").map((role: string, idx: number) => (
+                      <Badge key={idx} variant="secondary" className="font-heading">
+                        {role.trim()}
+                      </Badge>
+                    ))}
+                  </div>
 
                   <div className="space-y-2 text-sm mb-4">
                     {player.battingStyle && (
