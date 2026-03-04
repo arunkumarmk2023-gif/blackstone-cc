@@ -16,6 +16,7 @@ const ROLE_OPTIONS = ["Batsman", "Bowler", "All-Rounder", "Wicketkeeper"];
 
 export default function SimplePlayerForm({ player, onSuccess }: SimplePlayerFormProps) {
   const [name, setName] = useState(player?.name || "");
+  const [email, setEmail] = useState(player?.email || "");
   const [roles, setRoles] = useState<string[]>(
     player?.role ? (typeof player.role === "string" ? player.role.split(",").map(r => r.trim()) : []) : []
   );
@@ -108,6 +109,7 @@ export default function SimplePlayerForm({ player, onSuccess }: SimplePlayerForm
 
       const payload = {
         name,
+        email: email || undefined,
         role: roles.join(", "),
         battingStyle,
         bowlingStyle,
@@ -129,6 +131,7 @@ export default function SimplePlayerForm({ player, onSuccess }: SimplePlayerForm
         await createPlayer.mutateAsync(payload);
         toast.success("Player created");
         setName("");
+        setEmail("");
         setRoles([]);
         setBattingStyle("");
         setBowlingStyle("");
@@ -198,6 +201,18 @@ export default function SimplePlayerForm({ player, onSuccess }: SimplePlayerForm
             onChange={(e) => setName(e.target.value)}
             placeholder="Player name"
             required
+          />
+        </div>
+
+        {/* Email */}
+        <div>
+          <Label htmlFor="email" className="text-sm">Email (for match reminders)</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="player@example.com"
           />
         </div>
 

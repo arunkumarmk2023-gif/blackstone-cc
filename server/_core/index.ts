@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { sendFixtureReminders } from "../jobs/fixtureReminder";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -60,6 +61,14 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // Schedule fixture reminder job to run every hour
+  setInterval(() => {
+    sendFixtureReminders().catch(console.error);
+  }, 60 * 60 * 1000); // Run every hour
+
+  // Run fixture reminders immediately on startup
+  sendFixtureReminders().catch(console.error);
 }
 
 startServer().catch(console.error);

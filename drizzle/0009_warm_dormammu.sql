@@ -1,0 +1,1 @@
+ALTER TABLE `players` ADD `email` varchar(320);

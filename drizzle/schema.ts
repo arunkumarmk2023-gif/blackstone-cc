@@ -54,6 +54,7 @@ export type InsertFixture = typeof fixtures.$inferInsert;
 export const players = mysqlTable("players", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
   role: text("role").notNull(),
   battingStyle: varchar("battingStyle", { length: 50 }),
   bowlingStyle: varchar("bowlingStyle", { length: 50 }),

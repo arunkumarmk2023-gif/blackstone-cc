@@ -385,3 +385,92 @@ In the meantime, follow us on social media to stay updated on club activities an
 Connecticut Cricket League | Hard Tennis Ball Division
   `.trim();
 }
+
+/**
+ * Generate HTML template for fixture reminder email
+ */
+export function generateFixtureReminderEmail(
+  playerName: string,
+  opponent: string,
+  date: Date,
+  venue: string,
+  format: string
+): string {
+  const estTime = date.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+          .header { background-color: #1a1410; color: #fff; padding: 20px; border-radius: 5px; text-align: center; margin-bottom: 30px; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .content { margin-bottom: 30px; }
+          .content p { margin: 10px 0; }
+          .fixture-details { background-color: #f9f9f9; padding: 15px; border-left: 4px solid #d4af37; margin: 20px 0; }
+          .detail-row { margin: 10px 0; }
+          .label { font-weight: bold; color: #1a1410; }
+          .footer { border-top: 1px solid #e0e0e0; padding-top: 20px; margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
+          .social-links { margin-top: 15px; }
+          .social-links a { color: #d4af37; text-decoration: none; margin: 0 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Blackstone Cricket Club</h1>
+            <p style="margin: 5px 0; font-size: 16px;">Match Reminder</p>
+          </div>
+          
+          <div class="content">
+            <p>Hi ${playerName},</p>
+            
+            <p>This is a friendly reminder that Blackstone CC has an upcoming match <strong>tomorrow</strong>!</p>
+            
+            <div class="fixture-details">
+              <div class="detail-row">
+                <span class="label">Opponent:</span> ${opponent}
+              </div>
+              <div class="detail-row">
+                <span class="label">Date & Time (EST):</span> ${estTime}
+              </div>
+              <div class="detail-row">
+                <span class="label">Venue:</span> ${venue}
+              </div>
+              <div class="detail-row">
+                <span class="label">Format:</span> ${format}
+              </div>
+            </div>
+            
+            <p>Please make sure you're ready and arrive on time. If you have any questions or concerns, feel free to reach out to the team captain.</p>
+            
+            <p>Let's play well and represent Blackstone CC with pride!</p>
+            
+            <p>Best regards,<br><strong>Blackstone Cricket Club</strong></p>
+          </div>
+          
+          <div class="footer">
+            <p>Copyright 2026 Blackstone Cricket Club. All rights reserved.</p>
+            <p>Connecticut Cricket League | Hard Tennis Ball Division</p>
+            <div class="social-links">
+              <a href="https://www.facebook.com/profile.php?id=61571168053666">Facebook</a>
+              <a href="https://www.instagram.com/blackstone_cricket_club/">Instagram</a>
+              <a href="https://www.threads.com/@blackstone_cricket_club">Threads</a>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
