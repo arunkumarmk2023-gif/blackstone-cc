@@ -32,12 +32,61 @@ export default function AdminDashboard() {
   const contactQuery = trpc.contact.list.useQuery();
   const galleryQuery = trpc.gallery.list.useQuery();
   const joinersQuery = trpc.joiners.list.useQuery();
-  const deleteFixture = trpc.fixtures.delete.useMutation();
-  const deletePlayer = trpc.players.delete.useMutation();
-  const deleteNews = trpc.news.delete.useMutation();
-  const deleteJoiner = trpc.joiners.delete.useMutation();
-  const deleteGallery = trpc.gallery.delete.useMutation();
-  const deleteResult = trpc.results.delete.useMutation();
+  const utils = trpc.useUtils();
+  const deleteFixture = trpc.fixtures.delete.useMutation({
+    onSuccess: () => {
+      utils.fixtures.list.invalidate();
+      toast.success("Fixture deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete fixture");
+    },
+  });
+  const deletePlayer = trpc.players.delete.useMutation({
+    onSuccess: () => {
+      utils.players.list.invalidate();
+      toast.success("Player deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete player");
+    },
+  });
+  const deleteNews = trpc.news.delete.useMutation({
+    onSuccess: () => {
+      utils.news.list.invalidate();
+      toast.success("News deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete news");
+    },
+  });
+  const deleteJoiner = trpc.joiners.delete.useMutation({
+    onSuccess: () => {
+      utils.joiners.list.invalidate();
+      toast.success("Joiner deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete joiner");
+    },
+  });
+  const deleteGallery = trpc.gallery.delete.useMutation({
+    onSuccess: () => {
+      utils.gallery.list.invalidate();
+      toast.success("Gallery item deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete gallery item");
+    },
+  });
+  const deleteResult = trpc.results.delete.useMutation({
+    onSuccess: () => {
+      utils.results.list.invalidate();
+      toast.success("Result deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete result");
+    },
+  });
   const uploadGallery = trpc.gallery.upload.useMutation();
 
   // Gallery upload form state
