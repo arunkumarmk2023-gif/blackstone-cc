@@ -87,7 +87,7 @@ export default function FixturesResults() {
               <div className="space-y-4">
                 {upcomingFixtures.map((fixture: any) => (
                   <Card key={fixture.id} className="p-6 bg-card border border-border hover:border-accent/50 transition-colors">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Date</p>
                         <p className="font-heading font-semibold">
@@ -115,8 +115,22 @@ export default function FixturesResults() {
                         <p className="font-heading font-semibold">{fixture.venue}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">League</p>
+                        <p className="text-sm text-muted-foreground mb-1">Format</p>
                         <Badge variant="outline">{fixture.format}</Badge>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Status</p>
+                        <Badge className={`${
+                          fixture.status === "upcoming"
+                            ? "bg-blue-600 text-white"
+                            : fixture.status === "live"
+                            ? "bg-red-600 text-white"
+                            : fixture.status === "completed"
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-600 text-white"
+                        }`}>
+                          {fixture.status.charAt(0).toUpperCase() + fixture.status.slice(1)}
+                        </Badge>
                       </div>
                     </div>
                   </Card>
