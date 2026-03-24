@@ -12,6 +12,8 @@ import SimpleFixtureForm from "@/components/SimpleFixtureForm";
 import SimpleResultForm from "@/components/SimpleResultForm";
 import SimplePlayerForm from "@/components/SimplePlayerForm";
 import SimpleNewsForm from "@/components/SimpleNewsForm";
+import SimpleSponsorForm from "@/components/SimpleSponsorForm";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -24,6 +26,7 @@ export default function AdminDashboard() {
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [showGalleryUpload, setShowGalleryUpload] = useState(false);
+  const [editingSponsor, setEditingSponsor] = useState<any>(null);
 
   const fixturesQuery = trpc.fixtures.list.useQuery();
   const resultsQuery = trpc.results.list.useQuery();
@@ -33,6 +36,7 @@ export default function AdminDashboard() {
   const contactQuery = trpc.contact.list.useQuery();
   const galleryQuery = trpc.gallery.list.useQuery();
   const joinersQuery = trpc.joiners.list.useQuery();
+  const sponsorsQuery = trpc.sponsors.listAll.useQuery();
   const utils = trpc.useUtils();
   const deleteFixture = trpc.fixtures.delete.useMutation({
     onSuccess: () => {
@@ -68,6 +72,16 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast.error("Failed to delete joiner");
+    },
+  });
+  const deleteSponsorMutation = trpc.sponsors.delete.useMutation({
+    onSuccess: () => {
+      utils.sponsors.listAll.invalidate();
+      utils.sponsors.list.invalidate();
+      toast.success("Sponsor deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete sponsor");
     },
   });
   const deleteGallery = trpc.gallery.delete.useMutation({
@@ -136,7 +150,7 @@ export default function AdminDashboard() {
         <section className="py-12">
           <div className="container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-9">
+              <TabsList className="grid w-full grid-cols-10">
                 <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
                 <TabsTrigger value="results">Results</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
@@ -146,7 +160,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="joinRequests">Join Requests</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                <TabsTrigger value="joiners">Joiners</TabsTrigger>
+                <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
               </TabsList>
 
               {/* Fixtures Tab */}
@@ -749,6 +763,76 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground">No join applications yet.</p>
                   </Card>
                 )}
+              </TabsContent>
+
+              {/* Sponsors Tab */}
+              <TabsContent value="sponsors" className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Sponsors</h2>
+                  <p className="text-muted-foreground mb-6">Manage club sponsors and partnerships.</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div>
+                    <SimpleSponsorForm />
+                  </div>
+                  <div className="lg:col-span-2">
+                    {sponsorsQuery.isLoading ? (
+                      <div className="flex items-center justify-center gap-2 py-12">
+                        <Loader2 className="animate-spin" />
+                        <span>Loading sponsors...</span>
+                      </div>
+                    ) : sponsorsQuery.data && sponsorsQuery.data.length > 0 ? (
+                      <div className="space-y-4">
+                        {sponsorsQuery.data.map((sponsor: any) => (
+                          <Card key={sponsor.id} className="p-6 bg-card border-border">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex-1">
+                                <h3 className="font-heading font-semibold text-foreground text-lg">{sponsor.name}</h3>
+                                <Badge className="mt-2" variant="outline">
+                                  {sponsor.tier?.toUpperCase()}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingSponsor(sponsor);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    deleteSponsorMutation.mutate({ id: sponsor.id });
+                                  }}
+                                  disabled={deleteSponsorMutation.isPending}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                            {sponsor.description && (
+                              <p className="text-sm text-muted-foreground mb-3">{sponsor.description}</p>
+                            )}
+                            {sponsor.website && (
+                              <a href={sponsor.website} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline">
+                                {sponsor.website}
+                              </a>
+                            )}
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="p-8 text-center">
+                        <p className="text-muted-foreground">No sponsors yet. Add one using the form.</p>
+                      </Card>
+                    )}
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
 

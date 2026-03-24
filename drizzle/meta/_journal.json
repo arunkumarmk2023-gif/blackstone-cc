@@ -71,6 +71,13 @@
       "when": 1772588772909,
       "tag": "0009_warm_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1774387897973,
+      "tag": "0010_green_wonder_man",
+      "breakpoints": true
     }
   ]
 }

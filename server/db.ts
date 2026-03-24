@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery, joiners, InsertJoiner, results, InsertResult } from "../drizzle/schema";
+import { InsertUser, users, fixtures, InsertFixture, players, InsertPlayer, news, InsertNews, notifications, InsertNotification, newsletterSubscribers, InsertNewsletterSubscriber, contactSubmissions, InsertContactSubmission, gallery, InsertGallery, joiners, InsertJoiner, results, InsertResult, sponsors, InsertSponsor } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -390,4 +390,42 @@ export async function deleteResult(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(results).where(eq(results.id, id));
+}
+
+// Sponsors CRUD operations
+export async function createSponsor(sponsor: InsertSponsor) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(sponsors).values(sponsor);
+}
+
+export async function getSponsors() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(sponsors).where(eq(sponsors.active, 1)).orderBy(sponsors.displayOrder);
+}
+
+export async function getAllSponsors() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(sponsors).orderBy(sponsors.displayOrder);
+}
+
+export async function getSponsorById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const sponsor = await db.select().from(sponsors).where(eq(sponsors.id, id)).limit(1);
+  return sponsor.length > 0 ? sponsor[0] : undefined;
+}
+
+export async function updateSponsor(id: number, data: Partial<InsertSponsor>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(sponsors).set(data).where(eq(sponsors.id, id));
+}
+
+export async function deleteSponsor(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(sponsors).where(eq(sponsors.id, id));
 }

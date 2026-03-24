@@ -1,72 +1,47 @@
-/* Heritage Grain Design: Sponsors page showcasing club partners */
+import { useMemo } from "react";
+import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, Globe } from "lucide-react";
-
-interface Sponsor {
-  name: string;
-  category: string;
-  description: string;
-  logo: string;
-  website?: string;
-}
+import { Mail, ExternalLink, Loader2 } from "lucide-react";
 
 export default function Sponsors() {
-  const sponsors: Sponsor[] = [
-    {
-      name: "Local Sports Equipment Co.",
-      category: "Gold Partner",
-      description: "Providing premium cricket equipment and team kits for Blackstone CC.",
-      logo: "https://via.placeholder.com/200x100?text=Sports+Co",
-      website: "https://example.com",
-    },
-    {
-      name: "Connecticut Fitness Center",
-      category: "Silver Partner",
-      description: "Supporting our training and fitness programs throughout the season.",
-      logo: "https://via.placeholder.com/200x100?text=Fitness",
-      website: "https://example.com",
-    },
-    {
-      name: "Regional Insurance Group",
-      category: "Silver Partner",
-      description: "Providing comprehensive coverage and support for our club activities.",
-      logo: "https://via.placeholder.com/200x100?text=Insurance",
-      website: "https://example.com",
-    },
-    {
-      name: "Community Restaurant",
-      category: "Bronze Partner",
-      description: "Catering and hospitality support for our matches and events.",
-      logo: "https://via.placeholder.com/200x100?text=Restaurant",
-      website: "https://example.com",
-    },
-    {
-      name: "Local Print Services",
-      category: "Bronze Partner",
-      description: "Marketing and promotional materials for Blackstone CC.",
-      logo: "https://via.placeholder.com/200x100?text=Print+Services",
-      website: "https://example.com",
-    },
-    {
-      name: "Tech Solutions Ltd",
-      category: "Bronze Partner",
-      description: "Website and digital infrastructure support for the club.",
-      logo: "https://via.placeholder.com/200x100?text=Tech",
-      website: "https://example.com",
-    },
-  ];
+  const sponsorsQuery = trpc.sponsors.list.useQuery();
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "Gold Partner":
+  // Group sponsors by tier
+  const sponsorsByTier = useMemo(() => {
+    if (!sponsorsQuery.data) return { gold: [], silver: [], bronze: [] };
+    
+    const grouped = {
+      gold: sponsorsQuery.data.filter((s: any) => s.tier === "gold"),
+      silver: sponsorsQuery.data.filter((s: any) => s.tier === "silver"),
+      bronze: sponsorsQuery.data.filter((s: any) => s.tier === "bronze"),
+    };
+    return grouped;
+  }, [sponsorsQuery.data]);
+
+  const getTierLabel = (tier: string) => {
+    switch (tier) {
+      case "gold":
+        return "Gold Partner";
+      case "silver":
+        return "Silver Partner";
+      case "bronze":
+        return "Bronze Partner";
+      default:
+        return tier;
+    }
+  };
+
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case "gold":
         return "bg-yellow-700 text-white";
-      case "Silver Partner":
+      case "silver":
         return "bg-slate-500 text-white";
-      case "Bronze Partner":
+      case "bronze":
         return "bg-amber-700 text-white";
       default:
         return "bg-secondary text-secondary-foreground";
@@ -141,47 +116,145 @@ export default function Sponsors() {
             Our Current Partners
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sponsors.map((sponsor, index) => (
-              <Card key={index} className="p-6 bg-card border-border hover:border-accent transition-all group">
-                {/* Logo Placeholder */}
-                <div className="relative mb-6 h-24 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
-                  <img
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    className="max-w-full max-h-full object-contain p-2"
-                  />
-                </div>
-
-                {/* Sponsor Info */}
-                <Badge className={`${getCategoryColor(sponsor.category)} mb-3`} variant="secondary">
-                  {sponsor.category}
-                </Badge>
-
-                <h3 className="font-display font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
-                  {sponsor.name}
-                </h3>
-
-                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                  {sponsor.description}
-                </p>
-
-                {sponsor.website && (
-                  <div className="inline-flex">
-                    <a
-                      href={sponsor.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-sm font-semibold"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Visit Website
-                    </a>
+          {sponsorsQuery.isLoading ? (
+            <div className="flex items-center justify-center gap-2 py-12">
+              <Loader2 className="animate-spin" />
+              <span>Loading sponsors...</span>
+            </div>
+          ) : sponsorsQuery.data && sponsorsQuery.data.length > 0 ? (
+            <div>
+              {sponsorsByTier.gold.length > 0 && (
+                <div className="mb-16">
+                  <h3 className="font-display font-bold text-2xl text-yellow-600 mb-6">Gold Partners</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {sponsorsByTier.gold.map((sponsor: any) => (
+                      <Card key={sponsor.id} className="p-6 bg-card border-border hover:border-accent transition-all group">
+                        {sponsor.logo && (
+                          <div className="relative mb-6 h-32 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+                            <img
+                              src={sponsor.logo}
+                              alt={sponsor.name}
+                              className="max-w-full max-h-full object-contain p-2"
+                            />
+                          </div>
+                        )}
+                        <Badge className={`${getTierColor(sponsor.tier)} mb-3`} variant="secondary">
+                          {getTierLabel(sponsor.tier)}
+                        </Badge>
+                        <h3 className="font-display font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
+                          {sponsor.name}
+                        </h3>
+                        {sponsor.description && (
+                          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                            {sponsor.description}
+                          </p>
+                        )}
+                        {sponsor.website && (
+                          <a
+                            href={sponsor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-sm font-semibold"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Visit Website
+                          </a>
+                        )}
+                      </Card>
+                    ))}
                   </div>
-                )}
-              </Card>
-            ))}
-          </div>
+                </div>
+              )}
+              {sponsorsByTier.silver.length > 0 && (
+                <div className="mb-16">
+                  <h3 className="font-display font-bold text-2xl text-slate-400 mb-6">Silver Partners</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {sponsorsByTier.silver.map((sponsor: any) => (
+                      <Card key={sponsor.id} className="p-6 bg-card border-border hover:border-accent transition-all group">
+                        {sponsor.logo && (
+                          <div className="relative mb-6 h-24 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+                            <img
+                              src={sponsor.logo}
+                              alt={sponsor.name}
+                              className="max-w-full max-h-full object-contain p-2"
+                            />
+                          </div>
+                        )}
+                        <Badge className={`${getTierColor(sponsor.tier)} mb-3`} variant="secondary">
+                          {getTierLabel(sponsor.tier)}
+                        </Badge>
+                        <h3 className="font-display font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
+                          {sponsor.name}
+                        </h3>
+                        {sponsor.description && (
+                          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                            {sponsor.description}
+                          </p>
+                        )}
+                        {sponsor.website && (
+                          <a
+                            href={sponsor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-sm font-semibold"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Visit Website
+                          </a>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {sponsorsByTier.bronze.length > 0 && (
+                <div className="mb-16">
+                  <h3 className="font-display font-bold text-2xl text-amber-600 mb-6">Bronze Partners</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {sponsorsByTier.bronze.map((sponsor: any) => (
+                      <Card key={sponsor.id} className="p-6 bg-card border-border hover:border-accent transition-all group">
+                        {sponsor.logo && (
+                          <div className="relative mb-6 h-20 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+                            <img
+                              src={sponsor.logo}
+                              alt={sponsor.name}
+                              className="max-w-full max-h-full object-contain p-2"
+                            />
+                          </div>
+                        )}
+                        <Badge className={`${getTierColor(sponsor.tier)} mb-3`} variant="secondary">
+                          {getTierLabel(sponsor.tier)}
+                        </Badge>
+                        <h3 className="font-display font-bold text-lg text-foreground mb-2 group-hover:text-accent transition-colors">
+                          {sponsor.name}
+                        </h3>
+                        {sponsor.description && (
+                          <p className="text-muted-foreground text-xs mb-4 leading-relaxed">
+                            {sponsor.description}
+                          </p>
+                        )}
+                        {sponsor.website && (
+                          <a
+                            href={sponsor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-heading text-xs font-semibold"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Visit
+                          </a>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Card className="p-12 text-center bg-card border-border">
+              <p className="text-muted-foreground">No sponsors to display yet.</p>
+            </Card>
+          )}
         </div>
       </section>
 

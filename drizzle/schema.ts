@@ -212,3 +212,22 @@ export const results = mysqlTable("results", {
 
 export type Result = typeof results.$inferSelect;
 export type InsertResult = typeof results.$inferInsert;
+
+/**
+ * Sponsors table for storing sponsor information
+ */
+export const sponsors = mysqlTable("sponsors", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  logo: text("logo"), // URL to sponsor logo
+  website: varchar("website", { length: 255 }), // Sponsor website URL
+  description: text("description"), // Short description of the sponsor
+  tier: mysqlEnum("tier", ["gold", "silver", "bronze"]).default("silver").notNull(), // Sponsorship tier
+  displayOrder: int("displayOrder").default(0), // Order to display sponsors
+  active: int("active").default(1), // 1 for active, 0 for inactive
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Sponsor = typeof sponsors.$inferSelect;
+export type InsertSponsor = typeof sponsors.$inferInsert;

@@ -2,8 +2,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoiner, getJoiners, getJoinerById, getJoinersByStatus, updateJoinerStatus, deleteJoiner, createResult, getResults, getResultById, updateResult, deleteResult } from "./db";
-import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoiner, InsertResult } from "../drizzle/schema";
+import { getFixtures, getFixtureById, createFixture, updateFixture, deleteFixture, getPlayers, getPlayerById, createPlayer, updatePlayer, deletePlayer, getNews, getNewsById, createNews, updateNews, deleteNews, getNotifications, createNotification, markNotificationAsRead, subscribeNewsletter, getNewsletterSubscribers, getSubscriberByEmail, unsubscribeNewsletter, deleteNewsletterSubscriber, createContactSubmission, getContactSubmissions, getContactSubmissionById, updateContactSubmissionStatus, deleteContactSubmission, createGalleryImage, getGalleryImages, getGalleryImageById, getGalleryImagesByCategory, updateGalleryImage, deleteGalleryImage, getFeaturedGalleryImages, createJoiner, getJoiners, getJoinerById, getJoinersByStatus, updateJoinerStatus, deleteJoiner, createResult, getResults, getResultById, updateResult, deleteResult, createSponsor, getSponsors, getAllSponsors, getSponsorById, updateSponsor, deleteSponsor } from "./db";
+import { InsertFixture, InsertPlayer, InsertNews, InsertNotification, InsertNewsletterSubscriber, InsertContactSubmission, InsertGallery, InsertJoiner, InsertResult, InsertSponsor } from "../drizzle/schema";
 import { sendEmail, generateContactConfirmationEmail, generateContactConfirmationEmailText } from "./email";
 import { storagePut } from "./storage";
 
@@ -368,6 +368,45 @@ export const appRouter = router({
       return await deleteResult(input.id);
     }),
   }),
-});
 
+  sponsors: router({
+    list: publicProcedure.query(() => getSponsors()),
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can view all sponsors");
+      return await getAllSponsors();
+    }),
+    getById: publicProcedure.input(z.object({ id: z.number() })).query(({ input }) => getSponsorById(input.id)),
+    create: protectedProcedure.input(z.object({
+      name: z.string().min(1),
+      logo: z.string().url().optional(),
+      website: z.string().url().optional(),
+      description: z.string().optional(),
+      tier: z.enum(["gold", "silver", "bronze"]).optional(),
+      displayOrder: z.number().optional(),
+      active: z.number().optional(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can create sponsors");
+      return await createSponsor(input as InsertSponsor);
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      data: z.object({
+        name: z.string().optional(),
+        logo: z.string().url().optional(),
+        website: z.string().url().optional(),
+        description: z.string().optional(),
+        tier: z.enum(["gold", "silver", "bronze"]).optional(),
+        displayOrder: z.number().optional(),
+        active: z.number().optional(),
+      }),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can update sponsors");
+      return await updateSponsor(input.id, input.data as Partial<InsertSponsor>);
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can delete sponsors");
+      return await deleteSponsor(input.id);
+    }),
+  }),
+});
 export type AppRouter = typeof appRouter;
