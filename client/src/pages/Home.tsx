@@ -2,15 +2,16 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-
+import { trpc } from "@/lib/trpc";
 import NotificationCenter from "@/components/NotificationCenter";
 import NewsletterForm from "@/components/NewsletterForm";
-import { ArrowRight, Trophy, Users, Calendar } from "lucide-react";
+import { ArrowRight, Trophy, Users, Calendar, Loader2 } from "lucide-react";
 
 export default function Home() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const sponsorsQuery = trpc.sponsors.list.useQuery();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -163,18 +164,39 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {/* Sponsor Logo Placeholders */}
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-24 bg-secondary rounded-lg flex items-center justify-center hover:bg-secondary/80 transition-colors"
-              >
-                <div className="text-center">
-                  <p className="text-muted-foreground text-sm font-heading">Partner {i}</p>
-                  <p className="text-xs text-muted-foreground/60">Logo here</p>
-                </div>
+            {sponsorsQuery.isLoading ? (
+              <div className="col-span-full flex items-center justify-center gap-2 py-8">
+                <Loader2 className="animate-spin" />
+                <span className="text-muted-foreground">Loading partners...</span>
               </div>
-            ))}
+            ) : sponsorsQuery.data && sponsorsQuery.data.length > 0 ? (
+              sponsorsQuery.data.map((sponsor: any) => (
+                <a
+                  key={sponsor.id}
+                  href={sponsor.website || "#"}
+                  target={sponsor.website ? "_blank" : undefined}
+                  rel={sponsor.website ? "noopener noreferrer" : undefined}
+                  className="h-24 bg-secondary rounded-lg flex items-center justify-center hover:bg-secondary/80 transition-colors group"
+                  title={sponsor.name}
+                >
+                  {sponsor.logo ? (
+                    <img
+                      src={sponsor.logo}
+                      alt={sponsor.name}
+                      className="max-w-full max-h-full object-contain p-2 group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-muted-foreground text-sm font-heading">{sponsor.name}</p>
+                    </div>
+                  )}
+                </a>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">No partners yet. Check back soon!</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 text-center">
