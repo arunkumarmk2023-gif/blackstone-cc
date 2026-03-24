@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Sponsor } from "@shared/types";
+import { Upload, X } from "lucide-react";
 
 interface SimpleSponsorFormProps {
   sponsor?: Sponsor;
@@ -22,10 +23,24 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
     active: sponsor?.active || 1,
   });
 
+  const [logoPreview, setLogoPreview] = useState<string | null>(sponsor?.logo || null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const showToast = (message: string, error = false) => {
     console.log(error ? `Error: ${message}` : message);
   };
   const utils = trpc.useUtils();
+
+  const uploadPhotoMutation = trpc.sponsors.uploadPhoto.useMutation({
+    onSuccess: (data) => {
+      setFormData({ ...formData, logo: data.url });
+      setLogoPreview(data.url);
+      showToast("Logo uploaded successfully");
+    },
+    onError: (error) => {
+      showToast(error.message, true);
+    },
+  });
 
   const createMutation = trpc.sponsors.create.useMutation({
     onSuccess: () => {
@@ -39,6 +54,7 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
         displayOrder: 0,
         active: 1,
       });
+      setLogoPreview(null);
       utils.sponsors.listAll.invalidate();
       utils.sponsors.list.invalidate();
       onSuccess?.();
@@ -60,6 +76,35 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
     },
   });
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("File size must be less than 5MB", true);
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      showToast("Please upload an image file", true);
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      uploadPhotoMutation.mutate({
+        file: base64,
+        filename: file.name,
+      });
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -78,7 +123,7 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createMutation.isPending || updateMutation.isPending || isUploading;
 
   return (
     <Card className="p-6 bg-card border-border">
@@ -98,15 +143,45 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Logo URL
+            Logo Upload
           </label>
-          <Input
-            type="url"
-            value={formData.logo}
-            onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-            placeholder="https://example.com/logo.png"
-            disabled={isLoading}
-          />
+          <div className="space-y-3">
+            {logoPreview && (
+              <div className="relative w-full h-32 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+                <img
+                  src={logoPreview}
+                  alt="Logo preview"
+                  className="max-w-full max-h-full object-contain p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLogoPreview(null);
+                    setFormData({ ...formData, logo: "" });
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <label className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-border rounded-lg bg-secondary/50 hover:bg-secondary cursor-pointer transition-colors">
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  {isUploading ? "Uploading..." : "Click to upload or drag and drop"}
+                </span>
+                <span className="text-xs text-muted-foreground/60">PNG, JPG, GIF up to 5MB</span>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={isLoading}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
 
         <div>

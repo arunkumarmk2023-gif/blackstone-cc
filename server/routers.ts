@@ -407,6 +407,17 @@ export const appRouter = router({
       if (ctx.user?.role !== "admin") throw new Error("Only admins can delete sponsors");
       return await deleteSponsor(input.id);
     }),
+    uploadPhoto: protectedProcedure.input(z.object({
+      file: z.string(),
+      filename: z.string(),
+    })).mutation(async ({ input, ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Only admins can upload photos");
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.file.split(",")[1], "base64");
+      const fileKey = `sponsors/${Date.now()}-${input.filename}`;
+      const result = await storagePut(fileKey, buffer, "image/jpeg");
+      return result;
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;
