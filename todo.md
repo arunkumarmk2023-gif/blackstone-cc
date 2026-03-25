@@ -103,3 +103,12 @@
 - [ ] Integrate into admin dashboard
 - [ ] Write and run tests
 - [ ] Test end-to-end and save checkpoint
+
+## Sponsor Edit Functionality
+
+- [x] Identified issue: SimpleSponsorForm not receiving sponsor prop when Edit button clicked
+- [x] Added useEffect hook to update form data when sponsor prop changes
+- [x] Updated AdminDashboard to pass editingSponsor data to SimpleSponsorForm
+- [x] Added Cancel button to form for clearing edit state
+- [x] Tested edit functionality - form now properly populates with sponsor data
+- [x] Verified Cancel button clears the form and resets state

@@ -765,7 +765,11 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div>
-                    <SimpleSponsorForm />
+                    <SimpleSponsorForm 
+                      sponsor={editingSponsor}
+                      onSuccess={() => setEditingSponsor(null)}
+                      onCancel={() => setEditingSponsor(null)}
+                    />
                   </div>
                   <div className="lg:col-span-2">
                     {sponsorsQuery.isLoading ? (

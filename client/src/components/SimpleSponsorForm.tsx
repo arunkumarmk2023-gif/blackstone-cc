@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,12 @@ import { Sponsor } from "@shared/types";
 import { Upload, X } from "lucide-react";
 
 interface SimpleSponsorFormProps {
-  sponsor?: Sponsor;
+  sponsor?: Sponsor | null;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorFormProps) {
+export default function SimpleSponsorForm({ sponsor, onSuccess, onCancel }: SimpleSponsorFormProps) {
   const [formData, setFormData] = useState({
     name: sponsor?.name || "",
     logo: sponsor?.logo || "",
@@ -25,6 +26,22 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
 
   const [logoPreview, setLogoPreview] = useState<string | null>(sponsor?.logo || null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Update form data when sponsor prop changes
+  useEffect(() => {
+    if (sponsor) {
+      setFormData({
+        name: sponsor.name || "",
+        logo: sponsor.logo || "",
+        website: sponsor.website || "",
+        description: sponsor.description || "",
+        tier: sponsor.tier || "bronze",
+        displayOrder: sponsor.displayOrder || 0,
+        active: sponsor.active || 1,
+      });
+      setLogoPreview(sponsor.logo || null);
+    }
+  }, [sponsor]);
 
   const showToast = (message: string, error = false) => {
     console.log(error ? `Error: ${message}` : message);
@@ -254,13 +271,26 @@ export default function SimpleSponsorForm({ sponsor, onSuccess }: SimpleSponsorF
           </label>
         </div>
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-heading"
-        >
-          {isLoading ? "Saving..." : sponsor ? "Update Sponsor" : "Add Sponsor"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground font-heading"
+          >
+            {isLoading ? "Saving..." : sponsor ? "Update Sponsor" : "Add Sponsor"}
+          </Button>
+          {sponsor && onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
       </form>
     </Card>
   );
