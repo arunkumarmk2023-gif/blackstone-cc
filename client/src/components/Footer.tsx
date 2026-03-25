@@ -21,7 +21,7 @@ export default function Footer() {
           <div>
             <div className="w-16 h-16 mb-4">
               <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/IakRzMrjjaUhHTHm.jpeg"
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663348981264/TxqSpfRtALEyqRNN.webp"
                 alt="Blackstone CC Logo"
                 className="w-full h-full object-contain mix-blend-screen"
                 style={{ backgroundColor: 'transparent' }}
