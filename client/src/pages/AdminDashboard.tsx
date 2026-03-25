@@ -155,7 +155,6 @@ export default function AdminDashboard() {
                 <TabsTrigger value="results">Results</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
                 <TabsTrigger value="news">News</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="joinRequests">Join Requests</TabsTrigger>
@@ -443,14 +442,6 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground">No news articles yet.</p>
                   </Card>
                 )}
-              </TabsContent>
-
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
-                <Card className="p-8 text-center">
-                  <p className="text-muted-foreground">Notification management coming soon.</p>
-                </Card>
               </TabsContent>
 
               {/* Newsletter Tab */}
